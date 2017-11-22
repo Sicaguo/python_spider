@@ -1,3 +1,11 @@
+'''
+  通过家乐福官网 爬取家乐福全国所有的门店信息
+
+  原理 ： 通过header的cookie选项来指定要获取的城市，即_C4CookieKeyCityNum={}字段
+  todo : 
+    1.连续发请求会出错，必须time.sleep() 而且time.sleep()也不是很好，要等很久还不一定能取得
+    2.for i in range(10): 这里应该要取得全国城市的数量
+'''
 from urllib import request
 from urllib import error
 from urllib import parse
