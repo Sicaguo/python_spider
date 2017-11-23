@@ -1,10 +1,7 @@
 '''
-  通过家乐福官网 爬取家乐福全国所有的门店信息
+  通过家乐福官网 爬取大润发全国所有的门店信息
 
-  原理 ： 通过header的cookie选项来指定要获取的城市，即_C4CookieKeyCityNum={}字段
-  todo : 
-    1.连续发请求会出错，必须time.sleep() 而且time.sleep()也不是很好，要等很久还不一定能取得
-    2.for i in range(10): 这里应该要取得全国城市的数量
+  rbguo 2017-11-23 created 
 '''
 from urllib import request
 from urllib import error
@@ -17,105 +14,112 @@ import csv
 import requests
 import time
 from bs4 import BeautifulSoup
+import json
 
-def get_carrefour():
+### 
+def get_carrefour_all_page_urls():
+  header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.3 Safari/537.36'}
+  url= 'http://www.rt-mart.com.cn/store/store_map/1'    ###通过地图来寻找，每个省对应一个数字,这个可以从源代码中找到
+    ##　获取所有的编号，存放在一个list里
+  req = requests.get(url,headers=header)
+  html = req.text
+    #print('### html = ',html)
+  #with open('rt.html','w') as f:
+  #  f.write(html)
+    #soup = BeautifulSoup(html)
+  soup = BeautifulSoup(html,'html5lib')
+  tag2= soup.find_all('div','rt_ListItem')
+  nums =[]
+  for item in tag2:
+    print(item)
+    num = item.get('province_no')
+    nums.append(num)
+    print(num)
+  print(nums)
+  map_urls=[]
+  for i in nums:
+    map_urls.append('http://www.rt-mart.com.cn/store/store_map/'+str(i))
+    #print(map_urls)
+  pattern = re.compile(r'storesJsonStr = \'\[(.+?)\]',re.S)
+  pattern1 = re.compile(r'pk_id":"(.+?)"',re.S)
+  store_ids = []
+  for link in map_urls:
+    print('#### link =  ',link)
+    req = requests.get(link,headers=header)
+    html = req.text
+      #print(html)
+    storesJsonStr = re.findall(pattern , html)[0]
+    '''
+        storesJsonStr : 
+          {"pk_id":"1001","name":"闸北店","lng":"121.454387","lat":"31.304442"},{"pk_id":"1002","name":"杨浦店","lng":"121.528179","lat":"31.294656"},\
+          {"pk_id":"1005","name":"大华店","lng":"121.427739876","lat":"31.286101826"},\
+          {"pk_id":"1020","name":"松江店","lng":"121.226019","lat":"31.023366"},{"pk_id":"1023","name":"春申店","lng":"121.414572","lat":"31.113807"},\
+          {"pk_id":"1027","name":"康桥店","lng":"121.585954","lat":"31.140193"},{"pk_id":"1033","name":"大宁店","lng":"121.45813","lat":"31.280569"},\
+          {"pk_id":"1038","name":"奉贤店","lng":"121.451128","lat":"30.912129"},\
+          {"pk_id":"1047","name":"曹安店","lng":"121.368202","lat":"31.25786"},\
+          {"pk_id":"1055","name":"平型关店","lng":"121.473061","lat":"31.272665"},{"pk_id":"1063","name":"三林店","lng":"121.498179","lat":"31.15548"},\
+          {"pk_id":"1066","name":"泗泾店","lng":"121.26735","lat":"31.123577"},{"pk_id":"1072","name":"华漕店","lng":"121.299324","lat":"31.217148"},\
+          {"pk_id":"1106","name":"安亭店","lng":"121.166672","lat":"31.293619"},{"pk_id":"1122","name":"泥城店","lng":"121.827018","lat":"30.91532"},\
+          {"pk_id":"1102","name":"美兰湖店","lng":"121.357999","lat":"31.415389"},{"pk_id":"1150","name":"南翔店","lng":"121.310666958","lat":"31.2975619164"}
+        is a str  ,but not a json format   这个不能直接json解析,单个是可以的{"pk_id":"1001","name":"闸北店","lng":"121.454387","lat":"31.304442"}
+        但是多个就不行了{"pk_id":"1001","name":"闸北店","lng":"121.454387","lat":"31.304442"},{"pk_id":"1002","name":"杨浦店","lng":"121.528179","lat":"31.294656"}
+    '''
+      #print('#### storesJsonStr = ',storesJsonStr) 
+      #print(type(storesJsonStr))  
+    pk_ids = re.findall(pattern1 , storesJsonStr)
+    for pk_id in pk_ids:
+      print('### pk_id = ',pk_id)
+      store_ids.append(pk_id)
+    #print(store_ids)
+  store_urls = []
+  for id in store_ids: 
+    store_urls.append('http://www.rt-mart.com.cn/store/detail/' + str(id))
+    #print(store_urls)
+  return store_urls
+    
+def get_single_page_info(url):
+  header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.3 Safari/537.36'}
+  req = requests.get(url,headers=header)
+  html = req.text
+  print(html)
+  soup = BeautifulSoup(html,'html5lib')
+  store_name_div = soup.find_all('div',id = 'store_detail_head')[0]  ###  cannot soup.find_all('div','store_detail_head') ,it equal soup.find_all('div',class_='store_detail_head')
+  store_name = store_name_div.p.get_text()
+  print('## store_name = ',store_name)
+  store_detail_content_div = soup.find_all('div',id = 'store_detail_content')[0]
+  #addr = store_detail_content_div.p.get_text()
+  #print('#### addr =' ,addr)
+  soup = BeautifulSoup(str(store_detail_content_div))
+  ps = soup.find_all('p')
+  tag_addr   = ps[1]  # addr class tag
+  addr_text  = tag_addr.get_text()      # 门店地址：上海市宝山区月罗路2380号       
+  addr = addr_text[5:] 
+  print('#### addr = ',addr)
+  info_list=[]
+  info_list.append('大润发')
+  info_list.append(store_name)
+  info_list.append(addr)
+  print(info_list)
+  return info_list
 
+def get_rt_market():
+  all_store_urls = get_carrefour_all_page_urls()
+  print(all_store_urls)
+  info_list = []
   with codecs.open('china_offical_markets_rt.csv', 'w+', encoding='utf-8') as market_file:  ### 追加写
     writer = csv.writer(market_file)
     writer.writerow(["品牌","商场名","地址"])
-    
-    header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.3 Safari/537.36'}
-    target_url= 'http://www.rt-mart.com.cn/store/store_map/1'    ###通过地图来寻找，每个省对应一个数字,这个可以从源代码中找到
-    ##　获取所有的编号，存放在一个list里
-    req = requests.get(url,headers=header)
+    for url in all_store_urls:
+      print('########## url =  ',url)
+      info_list = get_single_page_info(url)
+      print('########## info_list = ',info_list)
+      writer.writerow(info_list)
 
-
-
-
-    for i in range(10):
-      i = i+1
-      print("### city num = ",i)
-      header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.3 Safari/537.36',
-               'Cookie':'ASP.NET_SessionId=4qj3xf2izig5xtobr11fvh0g;  _C4CookieKeyCityNum={}; Hm_lvt_ad969e28d61c1bff627763d1cccefe7b=1511266659,\
-               1511273012; Hm_lpvt_ad969e28d61c1bff627763d1cccefe7b=1511273750; __utmt=1; __utma=95004995.1315565076.1511266659.1511266659.1511273013.2;\
-                __utmb=95004995.4.10.1511273013; __utmc=95004995; __utmz=95004995.1511266659.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'.format(i)}
-
-    #header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.3 Safari/537.36',
-    #        'Cookie':'ASP.NET_SessionId=4qj3xf2izig5xtobr11fvh0g; _C4CookieKeyCity={}; _C4CookieKeyCityNum=77; \
-    #Hm_lvt_ad969e28d61c1bff627763d1cccefe7b=1511266659,1511273012; Hm_lpvt_ad969e28d61c1bff627763d1cccefe7b=1511273750; __utmt=1; \
-    # __utma=95004995.1315565076.1511266659.1511266659.1511273013.2; __utmb=95004995.4.10.1511273013; __utmc=95004995; 
-    #__utmz=95004995.1511266659.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'.format(city),}
-      #time.sleep(1)
-     
-      try :
-        time.sleep(3)
-        html=requests.get('http://www.carrefour.com.cn/Store/Store.aspx',headers=header)
-      
-        data = html.text
-        #print(html.text)
-
-        pattern = re.compile(r'末页.+?page=(.+?)"></a>',re.S)
-        result = re.findall(pattern , data)
-        if (result):
-          tatol_page = int(result[0])
-        else:
-          tatol_page = 1
-        print('######## tatol_page = ',tatol_page)
-        for j in range(tatol_page):
-            j=j+1
-            print('### page = ',j)
-            
-            url = "http://www.carrefour.com.cn/Store/Store.aspx?&page=%s"%(j)
-
-            print("#### url = ",url)
-            time.sleep(3)
-            try:
-              req = requests.get(url,headers=header)
-              html = req.text
-              #print('######## html ',html)
-              #with codecs.open('{}_guanzhou_{}.html'.format(i,j), 'a', encoding='utf-8') as fd:  ### 追加写
-              #  fd.write(html)
-
-              div_bf = BeautifulSoup(html)
-              tbody = div_bf.find_all('tbody')
-              tbody0 = BeautifulSoup(str(tbody[0]))
-              #tbody = a_bf.find_all('tbody')
-              #print('#### tbody0  = ',tbody0)
-              #with codecs.open('tbody{}.txt'.format(j), 'a', encoding='utf-8') as fb:  ### 追加写
-              #  fb.write(str(tbody0))
-              
-              tr = tbody0.find_all('tr')
-              #print('##### tr[0] = ',str(tr[0]))
-              #print('##### tr= ',tr)
-              #print('####### type tr = ',type(tr))  ## 是一个class对象，但是可迭代
-              for tri in tr:
-              #  print(' ##### tri = ',tri)
-                tri = BeautifulSoup(str(tri))
-                a = tri.find_all('a')
-                name = a[0].string
-                addr = a[1].string
-                info_list = []
-                info_list.append(name)
-                info_list.append(addr)
-                info_list.insert(0,'家乐福'+addr[0:2])
-                print('#### info_list = ',info_list)
-                print('#### info_list = ',info_list,file=log_file)
-
-                writer.writerow(info_list)  
-            except:
-                print('####### except 1 ##########  city num = %d,page = %d'%(i,j))
-                print('####### except 1 ##########  city num = %d,page = %d'%(i,j),file=log_file)
-                pass
-        
-          
-      except:
-            print('####### except 1 ##########  city num = %d,page = %d'%(i,j))
-            print('####### except 1 ##########  city num = %d,page = %d'%(i,j),file=log_file)
-            
-            pass
-
+  
 
 if(__name__ == '__main__'):
-    log_file = open("./china_carrfour_log.txt", 'w+') 
-    get_carrefour()
+    log_file = open("./china_rt_log.txt", 'w+') 
+    get_rt_market()
+    #get_carrefour_all_page_urls()
+    #get_single_page_info('http://www.rt-mart.com.cn/store/detail/1102')
     log_file.close()
