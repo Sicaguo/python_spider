@@ -2,7 +2,7 @@
 # @Author: Teiei
 # @Date:   2017-11-23 19:43:01
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-11-24 13:56:26
+# @Last Modified time: 2017-11-24 15:35:25
 # 
 # TODO 1
 # 1 .运行一段是就后会卡住print(city,file=log_file)打印完后
@@ -47,26 +47,50 @@
 '''
 #	4.一次抓取可能抓取不全，比如虽然url正确，但是有时候网络不好，请求超时，结果中应该给出哪些省份没有抓取到。
 #	5.算法改进，现在计算机要请求34*34次,显然如果前面已经找到了的城市和序号，则不需要再找了。
+#	6.安徽亳州市数据有点异常，所属城市没有抓到
+#	7.沃尔玛还有山姆店，但是程序没有实现抓取。
+#	
+#	--------结论--------------
+#	pingying.txt中要注意内蒙古，山西，陕西的写法
+#	1.全国34个省区市中，只有25个分布有沃尔玛。
+#	2.以下省份有合法的Url，但是没有分店
+#	['http://www.wal-martchina.com/walmart/store/5_gansu.htm', 
+#'http://www.wal-martchina.com/walmart/store/9_hainan.htm',
+# 'http://www.wal-martchina.com/walmart/store/22_ningxia.htm',
+# 'http://www.wal-martchina.com/walmart/store/23_qinghai.htm', 
+#'http://www.wal-martchina.com/walmart/store/30_taiwan.htm']
+#   3.以下省份连合法的url都没有，当然也没有分店
+#    ['xianggang', 'aomen', 'xizang', 'xinjiang']
+
 import re
 import requests
 import urllib,codecs,csv
 from bs4 import BeautifulSoup
+import datetime
+def current_time():   ## 记录程序运行时间
+     return datetime.datetime.now().strftime('%Y.%m.%d-%H:%M:%S')
 def get_walmat_urls():
 
+	global http_times     ### 总共尝试的http请求次数
+	http_times = 0
+	global citys 
 	citys = []
+	global ids
 	ids = [x for x in range(1,35)]
 	with open('pingying.txt','r+') as f:
 		for line in f.readlines():
 			citys.append(line[:-1])  ## 去掉'\n'
 	print(citys,file=log_file)
 	urls = []
-	
+	global city
+	global id
 	for id in ids:
 		for city in citys:
 			print(id,file=log_file)
 			print(city,file=log_file)
 			url = 'http://www.wal-martchina.com/walmart/store/'+str(id)+'_'+ city+'.htm'
-			try:		
+			try:
+				http_times  = http_times+1		
 				get_single_page(url)   
 				urls.append(url)	### 如果没有出错，则说明这个url是正确的
 				break;
@@ -87,10 +111,17 @@ def get_single_page(url):
 		request = urllib.request.Request(url)
 		response = urllib.request.urlopen(request)
 		     
-		print('type(response,file=log_file) = %s\n\n'%type(response))
-		print('response.geturl(,file=log_file) = %s\n\n'%response.geturl())
-		print('response.info(,file=log_file) = %s\n\n'%response.info())
+		#print('type(response,file=log_file) = %s\n\n'%type(response))
+		#print('response.geturl(,file=log_file) = %s\n\n'%response.geturl())
+		#print('response.info(,file=log_file) = %s\n\n'%response.info())
 		print('respense.getcode(,file=log_file) = %s\n\n'%response.getcode())
+		print('### city is :',city)
+		citys.remove(city)	## rbguo fix TODO5 2017-11-24  这里由于外部也正在for city in citys: 正在引用city 这样搞会不会问题？
+		#ids.remove(id)	## rbguo fix TODO5 2017-11-24  id不用删除，因为有break
+		print('#### citys = ',citys,file=log_file)
+		print('#### ids = ',ids,file=log_file)
+		print('#### citys = ',citys)
+		print('#### ids = ',ids)
 		try:      ###如果上面都执行到了，说明url正确,但是可能解析出错，这里记录url正确，但是最终每次成功的url
 			data = response.read()
 			#data = data.decode('utf-8',ignore)     ### 同样，这里因为print(str,file=log_file)参数为str 所以需要unicode
@@ -147,7 +178,8 @@ def get_single_page(url):
 						#print('\t',market_name)   ### 大连的 打印这个在我的xp电脑会出错，应该还是编码问题。在win10上没有问题
 						#print('\t',market_city)
 					elif(len(td_tags) == 1):  ### 专为沈阳写的
-						market_name = td_tags[0].string
+						market_city = td_tags[0].string
+						print('### 沈阳 market_name ',market_city)
 
 
 
@@ -176,16 +208,23 @@ def get_walmat():
 		writer = csv.writer(market_file)
 		writer.writerow(["品牌","商场名","地址","所属城市"])
 	urls = get_walmat_urls()
-	#for url in urls:
-	#	get_single_page(url)
 
 if __name__ == '__main__':
+	start_time  = current_time()
 	log_file = open("./china_walmart_log.txt", 'w+') 
 	excep3_urls =[]  ### 记录url正确,并且请求也得到回应，但是解析出错的url (可能各个页面的结构会有不同导致)
 					 ### 另外，台湾新疆宁夏青海西藏等省没有门店，但是url也是合法的，所以会被记住
-	get_walmat_urls()
+	get_walmat()
 	
 	#url = 'http://www.wal-martchina.com/walmart/store/20_liaoning.htm'
 	#url ='http://www.wal-martchina.com/walmart/store/26_shanghai.htm'
 	#get_single_page(url)
+	end_time  = current_time()
+	print('### 程序起始时间 start at :',start_time)
+	print('### 程序结束时间 end at :',end_time)
+	print('### 共发送http url请求数：http requests  :',http_times)
+	print('### 程序起始时间 start at :',start_time，file=log_file)
+	print('### 程序结束时间 end at :',end_time，file=log_file)
+	print('### 共发送http url请求数：http requests  :',http_times，file=log_file)
 	log_file.close()
+

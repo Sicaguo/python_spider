@@ -1,4 +1,5 @@
 shanghai
+beijing
 tianjin
 chongqing
 xianggang
