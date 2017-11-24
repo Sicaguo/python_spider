@@ -5,8 +5,48 @@
 # @Last Modified time: 2017-11-24 00:05:46
 # 
 # TODO 1
-# 1 .运行一段是就后会卡住print(city)打印完后
-# 2.要加一个判断，每个保存的walmat_urls不为空，则需要去除那里有了得城市。
+# 1 .运行一段是就后会卡住print(city,file=log_file)打印完后
+# 2.要加一个判断，如果保存的文件walmat_urls.txt不为空，则需要去除txt里面有了得城市。
+# 3. 城市名market_name = td_tags[1].string 和 地址 market_addr =  td_tags[2].string到底是对应哪个td这里还要进一步对应，如下，可通过td数来判断。
+'''
+		比如 这个包含了城市名 --'上海' 那么td  tag就有7个
+		 <tr height=68 style='height:51.0pt'>
+		  <td class=style3 width=33 style='border-top:none;
+		  width:25pt' rowspan="17">上海</td>
+		  <td class=xl6832132 width=226 style='border-top:none;border-left:none;
+		  width:170pt'>沃尔玛购物广场上海南浦大桥店</td>
+		  <td class=xl7232132 width=176 style='border-top:none;border-left:none;
+		  width:132pt'>浦东新区临沂北路252-262号由由-沃尔玛购物广场地上一层和地上二层</td>
+		  <td class=xl7132132 width=64 style='border-top:none;border-left:none;
+		  width:48pt'>021-50945881</td>
+		  <td class=xl7132132 style='border-top:none;border-left:none;
+		  width:223px'>公交：临沂北路龙阳路（119路；614路；640路；785路；973路；992路） <br>
+		    地铁：轨道交通4号线</td>
+		  <td class=style3 style='border-top:none;border-left:none; width: 68px;'>7:00-22:00</td>
+		  <td class=style3 style='border-top:none;border-left:none; width: 64px;'><a href="#"
+		  onclick="openwin('maps/shanghai/1014.htm')">查看地图</a></td>
+		 </tr>
+
+		下面没有包含，td tag就是6个
+		  </tr>
+		 <tr height=51 style='height:38.25pt'>
+		  <td class=xl6832132 width=226 style='border-top:none;border-left:none;
+		  width:170pt'>沃尔玛购物广场上海五角场分店</td>
+		  <td class=xl7232132 width=176 style='border-top:none;border-left:none;
+		  width:132pt'>上海市杨浦区淞沪路125号</td>
+		  <td class=xl7132132 width=64 style='border-top:none;border-left:none;
+		  width:48pt'>021-65115133</td>
+		  <td class=xl7132132 style='border-top:none;border-left:none;
+		  width:223px'>地铁10号线；公交55路 61路 99路 168路 307路 329路 406路 538路 713路 749路 817路
+		  819路 850路 854路 937路 942路<span style='mso-spacerun:yes'>&nbsp;</span></td>
+		  <td class=style3 style='border-top:none;border-left:none; width: 68px;'>7:30-22:00</td>
+		  <td class=style3 style='border-top:none;border-left:none; width: 64px;'><a href="#"
+		  onclick="openwin('maps/shanghai/1017.htm')">查看地图</a></td>
+		 </tr>
+
+'''
+#	4.一次抓取可能抓取不全，比如虽然url正确，但是有时候网络不好，请求超时，结果中应该给出哪些省份没有抓取到。
+#	5.算法改进，现在计算机要请求34*34次,显然如果前面已经找到了的城市和序号，则不需要再找了。
 import re
 import requests
 import urllib,codecs,csv
@@ -18,92 +58,124 @@ def get_walmat_urls():
 	with open('pingying.txt','r+') as f:
 		for line in f.readlines():
 			citys.append(line[:-1])  ## 去掉'\n'
-	print(citys)
+	print(citys,file=log_file)
 	urls = []
+	excep3_urls =[]  ### 记录url正确,并且请求也得到回应，但是解析出错的url (可能各个页面的结构会有不同导致)
 	for id in ids:
 		for city in citys:
-			print(id)
-			print(city)
+			print(id,file=log_file)
+			print(city,file=log_file)
 			url = 'http://www.wal-martchina.com/walmart/store/'+str(id)+'_'+ city+'.htm'
 			try:		
 				get_single_page(url)   
 				urls.append(url)	### 如果没有出错，则说明这个url是正确的
 				break;
 			except:
+				print('##### except1  ',file=log_file)
 				print('##### except1  ')
 				pass
 	with open('walmat_urls.txt ','w+') as f:    ###将上次遍历得到的urls保存下来。
-		f.write(urls)	
+		f.write(str(urls))
+	with open('excep3_urls.txt ','w+') as f:    ###将上次遍历得到的urls保存下来。
+		f.write(str(excep3_urls))	
 	return urls
 
 def get_single_page(url):
 	try:
+		print('#### http request : url = ',url ,file=log_file)
+		print('#### http request : url = ',url )
 		request = urllib.request.Request(url)
 		response = urllib.request.urlopen(request)
 		     
-		print('type(response) = %s\n\n'%type(response))
-		print('response.geturl() = %s\n\n'%response.geturl())
-		print('response.info() = %s\n\n'%response.info())
-		print('respense.getcode() = %s\n\n'%response.getcode())
-		data = response.read()
-		#data = data.decode('utf-8',ignore)     ### 同样，这里因为print(str)参数为str 所以需要unicode
-		data= data.decode('gbk')
-		soup = BeautifulSoup(data)
-		tab_tag = soup.find_all('table')[1]
-		#print(tab_tag)
-		soup1 = BeautifulSoup(str(tab_tag))
-		tr_tags = soup1.find_all('tr')   ###第0项目不是符合要求的
-		#for tr in tr_tag[1:]:
-		#	print('##### tr =', tr)
-		with codecs.open('china_offical_markets_walmat.csv', 'a', encoding='utf-8') as market_file:  ### 追加写
-			writer = csv.writer(market_file)
+		print('type(response,file=log_file) = %s\n\n'%type(response))
+		print('response.geturl(,file=log_file) = %s\n\n'%response.geturl())
+		print('response.info(,file=log_file) = %s\n\n'%response.info())
+		print('respense.getcode(,file=log_file) = %s\n\n'%response.getcode())
+		try:      ###如果上面都执行到了，说明url正确,但是可能解析出错，这里记录url正确，但是最终每次成功的url
+			data = response.read()
+			#data = data.decode('utf-8',ignore)     ### 同样，这里因为print(str,file=log_file)参数为str 所以需要unicode
+			data= data.decode('gbk')
+			soup = BeautifulSoup(data)
+			tab_tag = soup.find_all('table')[1]
+			#print(tab_tag,file=log_file)
+			soup1 = BeautifulSoup(str(tab_tag))
+			tr_tags = soup1.find_all('tr')   ###第0项目不是符合要求的
+			#for tr in tr_tag[1:]:
+			#	print('##### tr =', tr,file=log_file)
+			with codecs.open('china_offical_markets_walmat.csv', 'a', encoding='utf-8') as market_file:  ### 追加写
+				writer = csv.writer(market_file)
 
-			info_list = []
-			tr_tag1 = tr_tags[1]  ### 第1项目特殊
-			soup2 = BeautifulSoup(str(tr_tag1))
-			td_tags = soup2.find_all('td')
-			market_name = td_tags[1].string
-			market_addr =  td_tags[2].string
-			info_list.append("沃尔玛")
-			info_list.append(market_name)
-			info_list.append(market_addr)
-			print(info_list)
-			writer.writerow(info_list)
-
-			for tr_tag in tr_tags[2:]:
-				info_list = []
-				#print('##### tr_tag =', tr_tag)
-				soup2 = BeautifulSoup(str(tr_tag))
-				td_tags = soup2.find_all('td')
-				city = td_tags[0].string
-				market_name = td_tags[0].string
-				market_addr =  td_tags[1].string
-				info_list.append("沃尔玛")
-				info_list.append(market_name)
-				info_list.append(market_addr)
-				print(info_list)
-				writer.writerow(info_list)
+			
+				## rbguo fix TODO3  2017-11-24
+				for tr_tag in tr_tags[1:]:
+					#print('########## tr_tag',str(tr_tag))
+					soup2 = BeautifulSoup(str(tr_tag))
+					td_tags = soup2.find_all('td')
+					#print('#### type(td_tags)',type(td_tags))
+					#print('#### len ',len(td_tags))
+					info_list = []
+					if(len(td_tags) == 7):
+						#print('yes == 7')
+						market_city = td_tags[0].string  ## 如果有7个td_tag则第一个就是城市名
+						market_name = td_tags[1].string
+						market_addr = td_tags[2].string
+						info_list.append("沃尔玛")
+						info_list.append(market_name)
+						info_list.append(market_addr)
+														### 同样，一个url的第一个记录必然tag==7这样就不怕market_city没有定义了
+						info_list.append(market_city)	### 如果只有6个tag则一定是某个城市有多个分店，所以这里的market_city就是前面7个的那个
+						print(info_list,file=log_file)
+						print(info_list)
+						writer.writerow(info_list)	
+						print(market_addr)
+						print(market_name)
+						print(market_city)
+					elif(len(td_tags) == 6):  ###沈阳的url非常异常。
+						#print('no == 7')
+						#print('##### tr_tag =', tr_tag,file=log_file)
+						market_name = td_tags[0].string
+						market_addr =  td_tags[1].string
+						info_list.append("沃尔玛")
+						info_list.append(market_name)
+						info_list.append(market_addr)
+													### 同样，一个url的第一个记录必然tag==7这样就不怕market_city没有定义了
+						info_list.append(market_city)	### 如果只有6个tag则一定是某个城市有多个分店，所以这里的market_city就是前面7个的那个
+						print(info_list,file=log_file)
+						print(info_list)
+						writer.writerow(info_list)
+						#print('\t',market_addr)
+						print('\t',market_name)
+						#print('\t',market_city)
+						
+					
+		except:
+			
+			#print('##### except3 : url =  ',url,file=log_file)
+			print('##### except3 : url =  ',url)
+			#excep3_urls.append(url)
 			
 
 				
+
+				
 	except:
+		#print('##### except2 : url =  ',url,file=log_file)
 		print('##### except2 : url =  ',url)
-		raise
+		
 
 
 def get_walmat():
 	with codecs.open('china_offical_markets_walmat.csv', 'w+', encoding='utf-8') as market_file:
 		writer = csv.writer(market_file)
-		writer.writerow(["品牌","商场名","地址"])
+		writer.writerow(["品牌","商场名","地址","所属城市"])
 	urls = get_walmat_urls()
 	#for url in urls:
 	#	get_single_page(url)
 
 if __name__ == '__main__':
-
-	#with codecs.open('china_offical_markets_walmat.csv', 'w+', encoding='utf-8') as market_file:
-	#	writer = csv.writer(market_file)
-	#	writer.writerow(["品牌","商场名","地址"])
-	get_walmat_urls()
-	#url = 'http://www.wal-martchina.com/walmart/store/26_shanghai.htm'
-	#get_single_page(url)
+	log_file = open("./china_walmart_log.txt", 'w+') 
+	#get_walmat_urls()
+	
+	url = 'http://www.wal-martchina.com/walmart/store/20_liaoning.htm'
+	get_single_page(url)
+	log_file.close()
