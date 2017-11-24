@@ -2,7 +2,7 @@
 # @Author: Teiei
 # @Date:   2017-11-23 19:43:01
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-11-24 00:05:46
+# @Last Modified time: 2017-11-24 13:56:26
 # 
 # TODO 1
 # 1 .运行一段是就后会卡住print(city,file=log_file)打印完后
@@ -60,7 +60,7 @@ def get_walmat_urls():
 			citys.append(line[:-1])  ## 去掉'\n'
 	print(citys,file=log_file)
 	urls = []
-	excep3_urls =[]  ### 记录url正确,并且请求也得到回应，但是解析出错的url (可能各个页面的结构会有不同导致)
+	
 	for id in ids:
 		for city in citys:
 			print(id,file=log_file)
@@ -127,10 +127,10 @@ def get_single_page(url):
 						print(info_list,file=log_file)
 						print(info_list)
 						writer.writerow(info_list)	
-						print(market_addr)
-						print(market_name)
-						print(market_city)
-					elif(len(td_tags) == 6):  ###沈阳的url非常异常。
+						#print(market_addr)
+						#print(market_name)
+						#print(market_city)
+					elif(len(td_tags) == 6):  ### 沈阳的源代码非常异常 所以要限定为6 但是这样还是有错，沈阳的地址会写成大连的。
 						#print('no == 7')
 						#print('##### tr_tag =', tr_tag,file=log_file)
 						market_name = td_tags[0].string
@@ -140,27 +140,34 @@ def get_single_page(url):
 						info_list.append(market_addr)
 													### 同样，一个url的第一个记录必然tag==7这样就不怕market_city没有定义了
 						info_list.append(market_city)	### 如果只有6个tag则一定是某个城市有多个分店，所以这里的market_city就是前面7个的那个
-						print(info_list,file=log_file)
+						#print(info_list,file=log_file)
 						print(info_list)
 						writer.writerow(info_list)
 						#print('\t',market_addr)
-						print('\t',market_name)
+						#print('\t',market_name)   ### 大连的 打印这个在我的xp电脑会出错，应该还是编码问题。在win10上没有问题
 						#print('\t',market_city)
+					elif(len(td_tags) == 1):  ### 专为沈阳写的
+						market_name = td_tags[0].string
+
+
+
 						
 					
 		except:
 			
-			#print('##### except3 : url =  ',url,file=log_file)
+			print('##### except3 : url =  ',url,file=log_file)
 			print('##### except3 : url =  ',url)
-			#excep3_urls.append(url)
+			excep3_urls.append(url)
+			raise
 			
 
 				
 
 				
 	except:
-		#print('##### except2 : url =  ',url,file=log_file)
+		print('##### except2 : url =  ',url,file=log_file)
 		print('##### except2 : url =  ',url)
+		raise
 		
 
 
@@ -174,8 +181,11 @@ def get_walmat():
 
 if __name__ == '__main__':
 	log_file = open("./china_walmart_log.txt", 'w+') 
-	#get_walmat_urls()
+	excep3_urls =[]  ### 记录url正确,并且请求也得到回应，但是解析出错的url (可能各个页面的结构会有不同导致)
+					 ### 另外，台湾新疆宁夏青海西藏等省没有门店，但是url也是合法的，所以会被记住
+	get_walmat_urls()
 	
-	url = 'http://www.wal-martchina.com/walmart/store/20_liaoning.htm'
-	get_single_page(url)
+	#url = 'http://www.wal-martchina.com/walmart/store/20_liaoning.htm'
+	#url ='http://www.wal-martchina.com/walmart/store/26_shanghai.htm'
+	#get_single_page(url)
 	log_file.close()
