@@ -2,7 +2,7 @@
 # @Author: Teiei
 # @Date:   2017-11-23 19:43:01
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-11-25 07:40:00
+# @Last Modified time: 2017-11-25 08:23:08
 # 
 # TODO 1
 # 1 .运行一段是就后会卡住print(city,file=log_file)打印完后
@@ -48,7 +48,8 @@
 #	4.一次抓取可能抓取不全，比如虽然url正确，但是有时候网络不好，请求超时，\
 #			结果中应该给出哪些省份没有抓取到。   ## rbguo fixed 2017-11-24  use excep3_urls
 #	5.算法改进，现在计算机要请求34*34次,显然如果前面已经找到了的城市和序号，则不需要再找了。  ## rbguo fixed 2017-11-24  
-#	6.安徽亳州市数据有点异常，所属城市没有抓到    rbguo fixed 2017-11-25  use td_tags[0].get_text()  
+#	6.安徽亳州市数据有点异常，所属城市没有抓到，还有北京清河分店，长沙黄兴南路分店\
+#		   rbguo fixed 2017-11-25  use td_tags[0].get_text()   
 #	7.沃尔玛还有山姆店，但是程序没有实现抓取。
 #	8.程序结构要修改，get_single_page通过全局变量city citys 依赖到了get_walmat_urls  rbguo fixed 2017-11-25 
 #	
@@ -148,7 +149,8 @@ def get_single_page(url):
 						#market_city = td_tags[0].string  
 						market_city = td_tags[0].get_text()   ## fix TODO6 亳州<br>多了个<br>用string获取为none
 						market_name = td_tags[1].string
-						market_addr = td_tags[2].string
+						#market_addr = td_tags[2].string
+						market_addr = td_tags[2].get_text()  ## fix TODO6  北京清河分店，长沙黄兴南路分店
 						info_list.append("沃尔玛")
 						info_list.append(market_name)
 						info_list.append(market_addr)
@@ -164,7 +166,8 @@ def get_single_page(url):
 						#print('no == 7')
 						#print('##### tr_tag =', tr_tag,file=log_file)
 						market_name = td_tags[0].string
-						market_addr =  td_tags[1].string
+						#market_addr =  td_tags[1].string
+						market_addr = td_tags[1].get_text()  ## fix TODO6  北京清河分店，长沙黄兴南路分店
 						info_list.append("沃尔玛")
 						info_list.append(market_name)
 						info_list.append(market_addr)
@@ -213,11 +216,14 @@ if __name__ == '__main__':
 	log_file = open("./china_walmart_log.txt", 'w+') 
 	excep3_urls =[]  ### 记录url正确,并且请求也得到回应，但是解析出错的url (可能各个页面的结构会有不同导致)
 					 ### 另外，台湾新疆宁夏青海西藏等省没有门店，但是url也是合法的，所以会被记住
-	get_walmat()
+	#get_walmat()
+	url = 'http://www.wal-martchina.com/walmart/store/19_jilin.htm'
+	#url = 'http://www.wal-martchina.com/walmart/store/2_beijing.htm'
+	#url = 'http://www.wal-martchina.com/walmart/store/15_hunan.htm'
 	#url = 'http://www.wal-martchina.com/walmart/store/1_anhui.htm'
 	#url = 'http://www.wal-martchina.com/walmart/store/20_liaoning.htm'
 	#url ='http://www.wal-martchina.com/walmart/store/26_shanghai.htm'
-	#et_single_page(url)
+	get_single_page(url)
 	end_time  = current_time()
 	print('### 程序起始时间 start at :',start_time)
 	print('### 程序结束时间 end at :',end_time)
