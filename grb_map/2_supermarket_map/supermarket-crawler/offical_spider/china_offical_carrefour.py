@@ -24,24 +24,47 @@ def get_carrefour():
     writer = csv.writer(market_file)
     writer.writerow(["品牌","商场名","地址"])
     url='http://www.carrefour.com.cn/ws/city.ashx'
-    for i in range(10):
+    for i in range(100):
       i = i+1
       print("### city num = ",i)
+      '''
       header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.3 Safari/537.36',
-               'Cookie':'ASP.NET_SessionId=4qj3xf2izig5xtobr11fvh0g;  _C4CookieKeyCityNum={}; Hm_lvt_ad969e28d61c1bff627763d1cccefe7b=1511266659,\
-               1511273012; Hm_lpvt_ad969e28d61c1bff627763d1cccefe7b=1511273750; __utmt=1; __utma=95004995.1315565076.1511266659.1511266659.1511273013.2;\
-                __utmb=95004995.4.10.1511273013; __utmc=95004995; __utmz=95004995.1511266659.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'.format(i)}
+               'Cookie':\
+                'ASP.NET_SessionId=4qj3xf2izig5xtobr11fvh0g; \
+                _C4CookieKeyCityNum={};\
+                Hm_lvt_ad969e28d61c1bff627763d1cccefe7b=1511266659,\
+                1511273012; \
+                Hm_lpvt_ad969e28d61c1bff627763d1cccefe7b=1511273750; \
+                __utmt=1; \
+                __utma=95004995.1315565076.1511266659.1511266659.1511273013.2;\
+                   __utmb=95004995.4.10.1511273013;\
+                __utmc=95004995; \
+                __utmz=95004995.1511266659.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'.format(i)}
 
-    #header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.3 Safari/537.36',
-    #        'Cookie':'ASP.NET_SessionId=4qj3xf2izig5xtobr11fvh0g; _C4CookieKeyCity={}; _C4CookieKeyCityNum=77; \
-    #Hm_lvt_ad969e28d61c1bff627763d1cccefe7b=1511266659,1511273012; Hm_lpvt_ad969e28d61c1bff627763d1cccefe7b=1511273750; __utmt=1; \
-    # __utma=95004995.1315565076.1511266659.1511266659.1511273013.2; __utmb=95004995.4.10.1511273013; __utmc=95004995; 
-    #__utmz=95004995.1511266659.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'.format(city),}
-      #time.sleep(1)
-     
+      '''
+
+
+      header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2',
+               'Cookie':\
+                'ASP.NET_SessionId=szgsnf3wzixv3b01vikajhps; \
+                 _C4CookieKeyCityNum={}; \
+                 Hm_lvt_ad969e28d61c1bff627763d1cccefe7b=1511771124; \
+                 Hm_lpvt_ad969e28d61c1bff627763d1cccefe7b=1511771124;\
+                 __utmt=1;\
+                  __utma=148273317.89550502.1511771124.1511771124.1511771124.1;\
+                   __utmb=148273317.1.10.1511771124;\
+                    __utmc=148273317;\
+                     __utmz=148273317.1511771124.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'.format(i)}
+      #proxies = { "http": "http://10.10.1.10:3128", "https": "http://10.10.1.10:1080", }   
+      #proxies = {'http':'125.46.0.62:53281','http':'182.139.161.64:9999','http':'112.250.65.222:53281','http':'61.155.164.109:3128','http':'113.79.74.83:9797',\
+      
+      proxies = {'http':'218.241.234.48:8080'}   
+
+      #requests.get("http://example.org", proxies=proxies)  
+
       try :
-        time.sleep(3)
-        html=requests.get('http://www.carrefour.com.cn/Store/Store.aspx',headers=header)
+        time.sleep(5)
+        html=requests.get('http://www.carrefour.com.cn/Store/Store.aspx',headers=header,proxies=proxies)
       
         data = html.text
         #print(html.text)
@@ -53,21 +76,56 @@ def get_carrefour():
         else:
           tatol_page = 1
         print('######## tatol_page = ',tatol_page)
+        #print('####### data = ',data)
+        html = data
         for j in range(tatol_page):
             j=j+1
             print('### page = ',j)
+            if j != 1:
+
             
-            url = "http://www.carrefour.com.cn/Store/Store.aspx?&page=%s"%(j)
+              url = "http://www.carrefour.com.cn/Store/Store.aspx?&page=%s"%(j)
 
-            print("#### url = ",url)
-            time.sleep(3)
-            try:
-              req = requests.get(url,headers=header)
-              html = req.text
-              #print('######## html ',html)
-              #with codecs.open('{}_guanzhou_{}.html'.format(i,j), 'a', encoding='utf-8') as fd:  ### 追加写
-              #  fd.write(html)
+              print("#### url = ",url)
+              time.sleep(5)
+              try:
+                req = requests.get(url,headers=header,proxies=proxies)
+                html = req.text
+                #print('######## html ',html)
+                #with codecs.open('{}_guanzhou_{}.html'.format(i,j), 'a', encoding='utf-8') as fd:  ### 追加写
+                #  fd.write(html)
 
+                div_bf = BeautifulSoup(html)
+                tbody = div_bf.find_all('tbody')
+                tbody0 = BeautifulSoup(str(tbody[0]))
+                #tbody = a_bf.find_all('tbody')
+                #print('#### tbody0  = ',tbody0)
+                #with codecs.open('tbody{}.txt'.format(j), 'a', encoding='utf-8') as fb:  ### 追加写
+                #  fb.write(str(tbody0))
+                
+                tr = tbody0.find_all('tr')
+                #print('##### tr[0] = ',str(tr[0]))
+                #print('##### tr= ',tr)
+                #print('####### type tr = ',type(tr))  ## 是一个class对象，但是可迭代
+                for tri in tr:
+                #  print(' ##### tri = ',tri)
+                  tri = BeautifulSoup(str(tri))
+                  a = tri.find_all('a')
+                  name = a[0].string
+                  addr = a[1].string
+                  info_list = []
+                  info_list.append(name)
+                  info_list.append(addr)
+                  info_list.insert(0,'家乐福'+addr[0:2])
+                  print('#### info_list = ',info_list)
+                  print('#### info_list = ',info_list,file=log_file)
+
+                  writer.writerow(info_list)  
+              except:
+                  print('####### except 2 ##########  city num = %d,page = %d'%(i,j))
+                  print('####### except 2 ##########  city num = %d,page = %d'%(i,j),file=log_file)
+                  pass
+            else:
               div_bf = BeautifulSoup(html)
               tbody = div_bf.find_all('tbody')
               tbody0 = BeautifulSoup(str(tbody[0]))
@@ -75,7 +133,7 @@ def get_carrefour():
               #print('#### tbody0  = ',tbody0)
               #with codecs.open('tbody{}.txt'.format(j), 'a', encoding='utf-8') as fb:  ### 追加写
               #  fb.write(str(tbody0))
-              
+                
               tr = tbody0.find_all('tr')
               #print('##### tr[0] = ',str(tr[0]))
               #print('##### tr= ',tr)
@@ -93,12 +151,9 @@ def get_carrefour():
                 print('#### info_list = ',info_list)
                 print('#### info_list = ',info_list,file=log_file)
 
-                writer.writerow(info_list)  
-            except:
-                print('####### except 1 ##########  city num = %d,page = %d'%(i,j))
-                print('####### except 1 ##########  city num = %d,page = %d'%(i,j),file=log_file)
-                pass
-        
+                writer.writerow(info_list)         
+
+          
           
       except:
             print('####### except 1 ##########  city num = %d,page = %d'%(i,j))
