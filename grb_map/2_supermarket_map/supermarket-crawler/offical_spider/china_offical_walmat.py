@@ -216,14 +216,17 @@ if __name__ == '__main__':
 	log_file = open("./china_walmart_log.txt", 'w+') 
 	excep3_urls =[]  ### 记录url正确,并且请求也得到回应，但是解析出错的url (可能各个页面的结构会有不同导致)
 					 ### 另外，台湾新疆宁夏青海西藏等省没有门店，但是url也是合法的，所以会被记住
-	#get_walmat()
-	url = 'http://www.wal-martchina.com/walmart/store/19_jilin.htm'
+	get_walmat()
+
+	''' test single url 
+	#url = 'http://www.wal-martchina.com/walmart/store/19_jilin.htm'
 	#url = 'http://www.wal-martchina.com/walmart/store/2_beijing.htm'
 	#url = 'http://www.wal-martchina.com/walmart/store/15_hunan.htm'
 	#url = 'http://www.wal-martchina.com/walmart/store/1_anhui.htm'
 	#url = 'http://www.wal-martchina.com/walmart/store/20_liaoning.htm'
 	#url ='http://www.wal-martchina.com/walmart/store/26_shanghai.htm'
-	get_single_page(url)
+	#get_single_page(url)
+	'''
 	end_time  = current_time()
 	print('### 程序起始时间 start at :',start_time)
 	print('### 程序结束时间 end at :',end_time)
