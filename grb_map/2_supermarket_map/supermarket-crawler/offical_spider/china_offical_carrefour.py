@@ -17,6 +17,7 @@ import csv
 import requests
 import time
 from bs4 import BeautifulSoup
+import random
 
 def get_carrefour():
 
@@ -24,6 +25,15 @@ def get_carrefour():
     writer = csv.writer(market_file)
     writer.writerow(["品牌","商场名","地址"])
     url='http://www.carrefour.com.cn/ws/city.ashx'
+    proxy_pool = []
+    with open('proxy.txt','r+') as f:
+      lines = f.readlines() 
+    for line in lines:
+      proxy_pool.append(line.strip())
+    print(proxy_pool)
+
+    #proxies = { "http": "223.15.165.235:3128"} 
+    proxies = { }
     for i in range(100):
       i = i+1
       print("### city num = ",i)
@@ -55,19 +65,54 @@ def get_carrefour():
                    __utmb=148273317.1.10.1511771124;\
                     __utmc=148273317;\
                      __utmz=148273317.1511771124.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'.format(i)}
-      #proxies = { "http": "http://10.10.1.10:3128", "https": "http://10.10.1.10:1080", }   
+      #proxies = { "http": "http://10.10.1.10:3128", "https": "http://10.10.1.10:1080", } 
+      #proxies = { "http": "http://180.126.77.175:39171", "https": "http://59.38.61.247:9797", } 
       #proxies = {'http':'125.46.0.62:53281','http':'182.139.161.64:9999','http':'112.250.65.222:53281','http':'61.155.164.109:3128','http':'113.79.74.83:9797',\
-      
-      proxies = {'http':'218.241.234.48:8080'}   
 
+      
+      
       #requests.get("http://example.org", proxies=proxies)  
 
       try :
         time.sleep(5)
-        html=requests.get('http://www.carrefour.com.cn/Store/Store.aspx',headers=header,proxies=proxies)
-      
+        flag = 0
+        while(1):
+          print('### proxies is : ',proxies)
+          try:
+            html=requests.get('http://www.carrefour.com.cn/Store/Store.aspx',headers=header,proxies=proxies,timeout=6)
+            data = html.text
+            print(data)
+            print('#### state = ',html.status_code )
+            #print(html.headers.Content-Length)
+            
+            if (html.status_code  == 200):  
+              print('###response headers = ',html.headers)
+              print('before lenth')
+              key = 'Content-Length'
+              if key in html.headers:
+                print('### yes has ')
+                print(html.headers['Content-Length'])
+                if html.headers['Content-Length'] > 313: ###　光返回200不够,还要验证确实是返回了目标数据
+                  print('####### break1')
+                  flag = 1
+                  #break
+              else: ### 正常网页没有返回Content-Length
+                print('####### break2')
+                flag = 1
+                #break
+
+              
+
+            proxies={'http': random.choice(proxy_pool)}
+          except:
+            print('#####　except2222')
+            proxies={'http': random.choice(proxy_pool)}
+            #pass
+
+        #html=requests.get('http://www.carrefour.com.cn/Store/Store.aspx',headers=header)
+        
         data = html.text
-        #print(html.text)
+        print(data)
 
         pattern = re.compile(r'末页.+?page=(.+?)"></a>',re.S)
         result = re.findall(pattern , data)
@@ -89,7 +134,32 @@ def get_carrefour():
               print("#### url = ",url)
               time.sleep(5)
               try:
-                req = requests.get(url,headers=header,proxies=proxies)
+                proxies = {} ## 让每次最先无代理的
+                flag = 0
+                while(flag == 0):
+                  print('### proxies is : ',proxies)
+                  try:
+                    html=requests.get('http://www.carrefour.com.cn/Store/Store.aspx',headers=header,proxies=proxies,timeout=6)
+
+                    print('#### state = ',html.status_code )
+                    print(type(html.status_code))
+                    if (html.status_code  == 200):
+                      print('###response headers = ',html.headers)
+                      if key in html.headers:
+                        print('###　Content-Length =　',html.headers['Content-Length'])
+                        if html.headers['Content-Length'] > 313: ###　光返回200不够,还要验证确实是返回了目标数据，被封时返回了数据，长度为312
+                          print('####### break3')
+                          flag = 1
+                      else:
+                          print('####### break2')
+                          flag = 1
+                          #break  ### 正常网页没有返回Content-Length
+                    proxies={'http': random.choice(proxy_pool)}
+                  except:
+                    proxies={'http': random.choice(proxy_pool)}
+                    pass
+                #req = requests.get(url,headers=header,proxies=proxies)
+                #req = requests.get(url,headers=header)
                 html = req.text
                 #print('######## html ',html)
                 #with codecs.open('{}_guanzhou_{}.html'.format(i,j), 'a', encoding='utf-8') as fd:  ### 追加写
@@ -156,9 +226,8 @@ def get_carrefour():
           
           
       except:
-            print('####### except 1 ##########  city num = %d,page = %d'%(i,j))
-            print('####### except 1 ##########  city num = %d,page = %d'%(i,j),file=log_file)
-            
+            print('####### except 1 ##########  city num = ',i)
+            print('####### except 1 ##########  city num = ',i,file=log_file)
             pass
 
 
