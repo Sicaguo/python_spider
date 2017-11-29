@@ -3,9 +3,10 @@
 
   原理 ： 通过header的cookie选项来指定要获取的城市，即_C4CookieKeyCityNum={}字段
   todo : 
-    1.连续发请求会出错，必须time.sleep() 而且time.sleep()也不是很好，要等很久还不一定能取得
-    2.for i in range(10): 这里应该要取得全国城市的数量
+    1.连续发请求会出错，必须time.sleep() 而且time.sleep()也不是很好，要等很久还不一定能取得  rbguo fix 2017-11-29   使用代理
+    2.for i in range(10): 这里应该要取得全国城市的数量 rbguo fix 2017-11-29   使用代理
     3.todo  上海6个页面返回的都是一个第一个页面了         rbguo fix 2017-11-29  
+    4.需要提高速度，减小sleep()时间。另外，file_log有些没有打上。
 '''
 from urllib import request
 from urllib import error
@@ -22,37 +23,22 @@ import random
 
 def get_carrefour():
 
-  with codecs.open('china_offical_markets.csv', 'w+', encoding='utf-8') as market_file:  ### 追加写
+  with codecs.open('china_offical_carrefour.csv', 'w+', encoding='utf-8') as market_file:  
     writer = csv.writer(market_file)
     writer.writerow(["品牌","商场名","地址"])
-    url='http://www.carrefour.com.cn/ws/city.ashx'
+    #http://www.carrefour.com.cn/ws/city.ashx   这个网址可查询citynum对应的cityname
     proxy_pool = []
     with open('proxy.txt','r+') as f:
       lines = f.readlines() 
     for line in lines:
-      proxy_pool.append(line.strip())
+      proxy_pool.append(line.strip())  ### 去掉'\n'
     print(proxy_pool)
 
     #proxies = { "http": "223.15.179.137:3128"} 
-    proxies = { }
-    for i in range(1):
+    proxies = { } ## 让每次最先无代理的
+    for i in range(100):
       i = i+1
       print("### city num = ",i)
-      '''
-      header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.3 Safari/537.36',
-               'Cookie':\
-                'ASP.NET_SessionId=4qj3xf2izig5xtobr11fvh0g; \
-                _C4CookieKeyCityNum={};\
-                Hm_lvt_ad969e28d61c1bff627763d1cccefe7b=1511266659,\
-                1511273012; \
-                Hm_lpvt_ad969e28d61c1bff627763d1cccefe7b=1511273750; \
-                __utmt=1; \
-                __utma=95004995.1315565076.1511266659.1511266659.1511273013.2;\
-                   __utmb=95004995.4.10.1511273013;\
-                __utmc=95004995; \
-                __utmz=95004995.1511266659.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'.format(i)}
-
-      '''
 
 
       header={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:57.0) Gecko/20100101 Firefox/57.0',
@@ -72,10 +58,9 @@ def get_carrefour():
 
       
       
-      #requests.get("http://example.org", proxies=proxies)  
 
       try :
-        time.sleep(2)
+        time.sleep(3)
         while(1):
           print('### proxies1 is : ',proxies)
           try:
@@ -99,15 +84,21 @@ def get_carrefour():
                 if html.headers['Content-Length'] > 313: ###　光返回200不够,还要验证确实是返回了目标数据
                   print('####### break1')
                   break
+                elif html.headers['Content-Length'] > 312:
+                  proxies={'http': random.choice(proxy_pool)}   ### 如果返回了312，说明这个IP被封了,也要换ip了
               else: ### 正常网页没有返回Content-Length
                 print('####### break2')
                 break
 
               
 
-            proxies={'http': random.choice(proxy_pool)}
+            #proxies={'http': random.choice(proxy_pool)}
           except:
             print('#####　except2222')
+            if proxies:     ### 如果不为{}
+              proxy_pool.remove(proxies['http'])   ### 删除出异常的IP,这个IP可能不好用
+            print(proxy_pool)
+            print('#### len proxy_pool = ',len(proxy_pool))
             proxies={'http': random.choice(proxy_pool)}
             #pass
 
@@ -134,7 +125,7 @@ def get_carrefour():
               url = "http://www.carrefour.com.cn/Store/Store.aspx?&page=%s"%(j)
 
               print("#### url = ",url)  
-              time.sleep(2)
+              time.sleep(4)
               try:
                 #proxies = {} ## 让每次最先无代理的
                 while(1):
@@ -155,11 +146,18 @@ def get_carrefour():
                         if html.headers['Content-Length'] > 313: ###　光返回200不够,还要验证确实是返回了目标数据，被封时返回了数据，长度为312
                           print('####### break3')
                           break
+                        elif html.headers['Content-Length'] > 312:
+                          proxies={'http': random.choice(proxy_pool)}   ### 如果返回了312，说明这个IP被封了,也要换ip了
                       else:
                           print('####### break4')
                           break  ### 正常网页没有返回Content-Length
-                    proxies={'http': random.choice(proxy_pool)}
+                    
                   except:
+                    print('#####　except4444')
+                    if proxies:     ### 如果不为{}
+                      proxy_pool.remove(proxies['http'])   ### 删除出异常的IP,这个IP可能不好用
+                    print(proxy_pool)
+                    print('#### len proxy_pool2 = ',len(proxy_pool))
                     proxies={'http': random.choice(proxy_pool)}
                     pass
                 #req = requests.get(url,headers=header,proxies=proxies)
@@ -196,11 +194,14 @@ def get_carrefour():
                   info_list.insert(0,'家乐福'+addr[0:2])
                   print('#### info_list = ',info_list)
                   print('#### info_list = ',info_list,file=log_file)
-
+                  time.sleep(1) 
                   writer.writerow(info_list)  
+                   #### 等待写
               except:
-                  print('####### except 2 ##########  city num = %d,page = %d'%(i,j))
-                  print('####### except 2 ##########  city num = %d,page = %d'%(i,j),file=log_file)
+                  print('####### except 2-1 ##########  city num = %d,page = %d'%(i,j))
+                  print('####### except 2 ##########  city num = %d,page = %d'%(i,j),file=log_file)  ### 为什么这个没有写进文件
+                  print('####### except 2-2 ##########  city num = %d,page = %d'%(i,j))
+                  
                   pass
             else:
               try:
@@ -228,8 +229,9 @@ def get_carrefour():
                   info_list.insert(0,'家乐福'+addr[0:2])
                   print('#### info_list = ',info_list)
                   print('#### info_list = ',info_list,file=log_file)
-
-                  writer.writerow(info_list)     
+                  time.sleep(1)  #### 等待写 
+                  writer.writerow(info_list)   
+                   
               except:
                 print('####### except 3 ##########  city num = %d,page = %d'%(i,j))
                 print('####### except 3 ##########  city num = %d,page = %d'%(i,j),file=log_file)   
