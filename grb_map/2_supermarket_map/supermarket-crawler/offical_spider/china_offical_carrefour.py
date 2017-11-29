@@ -5,7 +5,7 @@
   todo : 
     1.连续发请求会出错，必须time.sleep() 而且time.sleep()也不是很好，要等很久还不一定能取得
     2.for i in range(10): 这里应该要取得全国城市的数量
-    3.todo  上海6个页面返回的都是一个第一个页面了
+    3.todo  上海6个页面返回的都是一个第一个页面了         rbguo fix 2017-11-29  
 '''
 from urllib import request
 from urllib import error
@@ -33,8 +33,8 @@ def get_carrefour():
       proxy_pool.append(line.strip())
     print(proxy_pool)
 
-    proxies = { "http": "223.15.179.137:3128"} 
-    #proxies = { }
+    #proxies = { "http": "223.15.179.137:3128"} 
+    proxies = { }
     for i in range(1):
       i = i+1
       print("### city num = ",i)
@@ -133,14 +133,14 @@ def get_carrefour():
             
               url = "http://www.carrefour.com.cn/Store/Store.aspx?&page=%s"%(j)
 
-              print("#### url = ",url)
+              print("#### url = ",url)  
               time.sleep(2)
               try:
                 #proxies = {} ## 让每次最先无代理的
                 while(1):
                   print('### proxies2 is : ',proxies)
                   try:
-                    html=requests.get('http://www.carrefour.com.cn/Store/Store.aspx',headers=header,proxies=proxies,timeout=6)
+                    html=requests.get(url,headers=header,proxies=proxies,timeout=6)  ##　rbguo fix Todo3 2017-11-29  
 
                    
                     print('#### state = ',html.status_code )
