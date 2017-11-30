@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 解析得到的地址的城市名称
 '''
@@ -20,7 +21,7 @@ import datetime
 def get_format_addr_from_lng_lat(lat,lng,ak):
     try:
         url2 = "http://api.map.baidu.com/geocoder/v2/?location=%s,%s&output=json&pois=1&ak=%s"%(lat ,lng,ak)
-        #print('#### url2 = ',url2,file=log_file)
+        print('#### url2 = ',url2)
         format_json = requests.get(url2).json() 
        # req2 = urllib.request.urlopen(url2)#JSON格式的返回数据
 
@@ -33,12 +34,13 @@ def get_format_addr_from_lng_lat(lat,lng,ak):
        
         return format_addr
     except Exception as crawl_error:
+
         print(current_time(),"########### except 3 ######################",file=log_file)
         print("########### except 3 ######################")
-        pass
+        return none
 
-
-def  get_format_addr_by_map(addr,ak):
+### 通过百度地图获取格式化的地址，然后在格式化的地址中提取出地级市
+def  get_format_addr_by_map(addr,ak):  ###
 	q = addr   		### 要搜索的关键字
 	region = '中国'
 	ak = 'QPBpKbOkCqkkToYT5VaFixoz3hkykVBi' 
@@ -48,49 +50,99 @@ def  get_format_addr_by_map(addr,ak):
 		print('### url = ',url)
 		res_json = requests.get(url).json()
 		record0 = res_json['results'][0]  ### 我们给定的地址，查询出来的应该只有一条，但是万一有多条，我们也只取一条，这个不保险 todo 
+		time.sleep(0.4)
 		format_addr = get_format_addr_from_lng_lat(record0['location']['lat'],record0['location']['lng'],ak)
 		print('#### format addr = ',format_addr)
-		return format_addr
+
+		### 提取地级市
+		result = re.match(r'(.+?市).+?', format_addr)
+		if result:
+			city = result.group(1) 
+			print('return city  ===== ',city)
+			return city
+		else:
+			print('return format_addr  ===== ',format_addr)
+			return format_addr
 	except:
+
 		print('#### except get_format_addr_by_map')
 
 
 def format_addr():
-	with open('china_offical_carrefour.csv','r+') as f:
+	with open('china_offical_carrefour_format.csv','r+') as f:
 		lines = f.readlines()
 	addrs=[]
 	for line in lines[1:]:
-		addr = line.split(',')[2]
-		addr = addr[:-1]  ### remove '\n'
-		addrs.append(addr)
-	print('addrs = ',addrs)
-	ak = 'QPBpKbOkCqkkToYT5VaFixoz3hkykVBi' 
-	i = 0
-	for addr in addrs:
-		result = re.match(r'(.+?市).+?$', addr)  ### 这种是我们想要的，获取地级市级别 (不过有的县级市也会来这里干扰)
-		if result:
-			city = result.group(1) 
-			addrs[i]=city
+		line = line.strip()
+		list_line = line.split(',')
+		print(list_line)       
+		ak = 'QPBpKbOkCqkkToYT5VaFixoz3hkykVBi' 
+		addr = list_line[2]   
+			  ### 这种是我们想要的，获取地级市级别 (不过有的县级市也会来这里干扰,比如常州溧阳市  所以也要format)
+		if  re.match(r'(.+?市).+?', addr):
+			city = re.match(r'(.+?市).+?', addr).group(1) 
+			print('         city ######   is ',city)
+			format_city = get_format_addr_by_map(city,ak)
+			addrs.append(format_city)
+
 		elif re.match(r'(.+?区).*?', addr):
 			city =  re.match(r'(.+?区).*?', addr).group(1)
 			format_city = get_format_addr_by_map(city,ak)  ### 通过百度地图获取格式化的地址，然后在格式化的地址中提取出地级市
-			addrs[i]=format_city
+			addrs.append(format_city)
+		elif re.match(r'(.+?县).*?', addr):
+			city = re.match(r'(.+?县).*?', addr).group(1)       ### 区县肯定找的到
+			format_city = get_format_addr_by_map(city,ak)
+			addrs.append(format_city)
 		elif re.match(r'(.+?号).*?', addr):
 			city = re.match(r'(.+?号).*?', addr).group(1)
 			format_city = get_format_addr_by_map(city,ak)
-			addrs[i]=format_city
-		else:
-			addrs[i]=addr  ### 不变
-		i=i+1
+			if format_city:  ### 如果成功找到
+				addrs.append(format_city)
+			elif re.match(r'(.+?街).*?', addr):
+				city = re.match(r'(.+?街).*?', addr).group(1)
+				format_city = get_format_addr_by_map(city,ak)
+				if format_city:  ### 如果成功找到
+					addrs.append(format_city)  ### 不变
+			else:    ### if not  , try the other method
+				city = '家乐福'+list_line[1]
+				print('#######qqqqq  city1 = ',city )
+				format_city = get_format_addr_by_map(city,ak)
+				if format_city:
+					addrs.append(format_city) 
+
+				
+
+		else:     ### 极其不规则的地址  使用  家乐福 + 利辛人民路店 来搜索,如果失败，则提取广场搜索
+			city = '家乐福'+list_line[1]
+			format_city = get_format_addr_by_map(city,ak)
+			print('#######qqqqq  家乐福 + city = ',city )
+			if format_city:  ### 如果成功找到
+				addrs.append(format_city)  ### 不变
+			elif re.match(r'(.+?广场).*?', addr):		
+				city = re.match(r'(.+?广场).*?', addr).group(1)
+				print('#######qqqqq  广场 + city = ',city )
+				format_city = get_format_addr_by_map(city,ak)
+				if format_city:  ### 如果成功找到
+					addrs.append(format_city)  ### 不变
+			elif re.match(r'(.+?街).*?', addr):
+				
+				city = re.match(r'(.+?街).*?', addr).group(1)
+				print('#######qqqqq  街 + city = ',city )
+				format_city = get_format_addr_by_map(city,ak)
+				if format_city:  ### 如果成功找到
+					addrs.append(format_city)  ### 不变
+
+
+
 
 
 	print('#### addrs = ',addrs)   #### 格式化地址
 
 	with open('china_offical_carrefour.csv','r+') as f:
 		lines = f.readlines()
-	with codecs.open('china_offical_carrefour_format_new.csv', 'w+', encoding='utf-8') as market_file:
+	with codecs.open('china_offical_carrefour_format_new2.csv', 'w+', encoding='utf-8') as market_file:
 		writer = csv.writer(market_file)
-		writer.writerow(["品牌","商场名","地址","所属城市"])
+		writer.writerow(["品牌","商场名","地址","所属城市","格式化地址"])
 		i = 0
 		for line in lines[1:]:
 			list_line  = line.split(',')  
