@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
+
 '''
-解析得到的地址的城市名称
-'''
-'''
-	从地址中提取地级市
+	从获取csv数据中提取出所属的地级市(直辖市)
 '''
 import re
 import codecs
@@ -50,7 +48,7 @@ def  get_format_addr_by_map(addr,ak):  ###
 		print('### url = ',url)
 		res_json = requests.get(url).json()
 		record0 = res_json['results'][0]  ### 我们给定的地址，查询出来的应该只有一条，但是万一有多条，我们也只取一条，这个不保险 todo 
-		time.sleep(0.4)
+		time.sleep(1)
 		format_addr = get_format_addr_from_lng_lat(record0['location']['lat'],record0['location']['lng'],ak)
 		print('#### format addr = ',format_addr)
 
@@ -68,8 +66,8 @@ def  get_format_addr_by_map(addr,ak):  ###
 		print('#### except get_format_addr_by_map')
 
 
-def format_addr():
-	with open('china_offical_carrefour_format.csv','r+') as f:
+def format_addr(csvfile,market_name):
+	with open(csvfile,'r+') as f:
 		lines = f.readlines()
 	addrs=[]
 	for line in lines[1:]:
@@ -77,7 +75,15 @@ def format_addr():
 		list_line = line.split(',')
 		print(list_line)       
 		ak = 'QPBpKbOkCqkkToYT5VaFixoz3hkykVBi' 
-		addr = list_line[2]   
+		try:
+			addr = list_line[2]     # 亳州的数据异常，多了一个换行
+								#	沃尔玛,沃尔玛购物广场亳州魏武广场分店,亳州市光明路魏武广场西侧新天地国际购物中心地下第一层,"亳州
+								#   "
+								#	沃尔玛,沃尔玛购物广场合肥翡翠路分店,安徽省合肥市经济技术开发区芙蓉路与翡翠路交叉口港澳广场地上二、三层,合肥'''
+		except:
+			pass   ### 忽略沃尔玛亳州这种
+
+		##
 			  ### 这种是我们想要的，获取地级市级别 (不过有的县级市也会来这里干扰,比如常州溧阳市  所以也要format)
 		if  re.match(r'(.+?市).+?', addr):
 			city = re.match(r'(.+?市).+?', addr).group(1) 
@@ -104,7 +110,7 @@ def format_addr():
 				if format_city:  ### 如果成功找到
 					addrs.append(format_city)  ### 不变
 			else:    ### if not  , try the other method
-				city = '家乐福'+list_line[1]
+				city = market_name +list_line[1]
 				print('#######qqqqq  city1 = ',city )
 				format_city = get_format_addr_by_map(city,ak)
 				if format_city:
@@ -113,9 +119,9 @@ def format_addr():
 				
 
 		else:     ### 极其不规则的地址  使用  家乐福 + 利辛人民路店 来搜索,如果失败，则提取广场搜索
-			city = '家乐福'+list_line[1]
+			city = market_name+list_line[1]
 			format_city = get_format_addr_by_map(city,ak)
-			print('#######qqqqq  家乐福 + city = ',city )
+			print('#######qqqqq  market_name + city = ',city )
 			if format_city:  ### 如果成功找到
 				addrs.append(format_city)  ### 不变
 			elif re.match(r'(.+?广场).*?', addr):		
@@ -135,20 +141,39 @@ def format_addr():
 
 
 
+	try:
+		print('#### addrs = ',addrs)   #### 格式化地址
+		with codecs.open(csvfile+'_formataddr.txt', 'w+', encoding='utf-8') as f:
+			for add in addrs:
+				writer = csv.writer(f)
+				writer.writerow(add)
+	except:
+		pass 
+	finally:
 
-	print('#### addrs = ',addrs)   #### 格式化地址
-
-	with open('china_offical_carrefour.csv','r+') as f:
-		lines = f.readlines()
-	with codecs.open('china_offical_carrefour_format_new2.csv', 'w+', encoding='utf-8') as market_file:
-		writer = csv.writer(market_file)
-		writer.writerow(["品牌","商场名","地址","所属城市","格式化地址"])
-		i = 0
-		for line in lines[1:]:
-			list_line  = line.split(',')  
-			list_line[2] =list_line[2][:-1] ## remove '\n'
-			list_line.append(addrs[i])
-			writer.writerow(list_line)
-			i = i+1
+		with open(csvfile,'r+') as f:
+			lines = f.readlines()
+		with codecs.open(csvfile[:-4]+'_format.csv', 'w+', encoding='utf-8') as market_file:
+			writer = csv.writer(market_file)
+			writer.writerow(["品牌","商场名","地址","所属城市","格式化地址"])
+			i = 0
+			for line in lines[1:]:
+				line = line.strip()
+				list_line  = line.split(',')  
+				list_line.append(addrs[i])
+				writer.writerow(list_line)
+				i = i+1
 if __name__ == '__main__':
-	format_addr()
+	#csvfiles = ["china_offical_metro.csv","china_offical_markets_walmat.csv","china_offical_markets_rt.csv"]
+	#market_names =["麦德龙","沃尔玛","大润发"]
+	#for file in csvfiles:
+	#	print(file)
+	#for market_name in market_names:
+	#	print(market_name)
+	#for i in  range( int(len(csvfiles)) ):
+	#	print(csvfiles[i])
+	#	print(market_names[i])
+	#	format_addr(csvfiles[i],market_names[i])
+	csvfile = "china_offical_markets_rt.csv"
+	market_name = "大润发"
+	format_addr(csvfile,market_name)
