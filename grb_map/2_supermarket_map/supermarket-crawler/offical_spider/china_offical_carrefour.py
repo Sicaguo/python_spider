@@ -191,7 +191,7 @@ def get_carrefour():
                   info_list = []
                   info_list.append(name)
                   info_list.append(addr)
-                  info_list.insert(0,'家乐福'+addr[0:2])
+                  info_list.insert(0,'家乐福')
                   print('#### info_list = ',info_list)
                   print('#### info_list = ',info_list,file=log_file)
                   time.sleep(1) 
