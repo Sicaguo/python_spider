@@ -174,6 +174,6 @@ if __name__ == '__main__':
 	#	print(csvfiles[i])
 	#	print(market_names[i])
 	#	format_addr(csvfiles[i],market_names[i])
-	csvfile = "china_offical_markets_rt.csv"
-	market_name = "大润发"
+	csvfile = "china_offical_yh.csv"
+	market_name = "永辉"
 	format_addr(csvfile,market_name)
