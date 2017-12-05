@@ -85,7 +85,12 @@ def format_addr(csvfile,market_name):
 
 		##
 			  ### 这种是我们想要的，获取地级市级别 (不过有的县级市也会来这里干扰,比如常州溧阳市  所以也要format)
-		if  re.match(r'(.+?市).+?', addr):
+		if  re.match(r'(.+?自治州).+?', addr):
+			city = re.match(r'(.+?自治州).+?', addr).group(1) 
+			print('         city ######   is ',city)
+			format_city = get_format_addr_by_map(city,ak)
+			addrs.append(format_city)	
+		elif  re.match(r'(.+?市).+?', addr):
 			city = re.match(r'(.+?市).+?', addr).group(1) 
 			print('         city ######   is ',city)
 			format_city = get_format_addr_by_map(city,ak)
@@ -174,6 +179,6 @@ if __name__ == '__main__':
 	#	print(csvfiles[i])
 	#	print(market_names[i])
 	#	format_addr(csvfiles[i],market_names[i])
-	csvfile = "china_offical_yh.csv"
-	market_name = "永辉"
+	csvfile = "china_offical_markets_walmat.csv"
+	market_name = "沃尔玛"
 	format_addr(csvfile,market_name)
