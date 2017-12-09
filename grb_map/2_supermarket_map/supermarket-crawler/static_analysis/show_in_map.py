@@ -63,7 +63,7 @@ def get_city(format_city):
 		return city
 
 def get_data_from_csvfile():
-	csvfile = 'china_offical_markets_total.csv'
+	csvfile = 'china_offical_markets_total1.csv'
 
 	with codecs.open(csvfile, 'r+', encoding='utf-8') as f:
 		lines = f.readlines()
@@ -98,6 +98,8 @@ data = get_data_from_csvfile()
 geo = Geo("六大超市全国总和分布图", "家乐福+沃尔玛+大润发+麦德龙+永辉+华润万家", title_color="#fff", title_pos="center",
 width=1200, height=600, background_color='#404a59')
 attr, value = geo.cast(data)
-geo.add("", attr, value, visual_range=[1,50], visual_text_color="#fff", symbol_size=5, is_visualmap=True)
+
+###  visual_text_color="#fff", 这个设置之后，左边那个图例才有有数字  #000代表'黑'   "#fff"代表'白'
+geo.add("", attr, value, visual_range=[1,90], visual_text_color="#000",is_label_show = True,label_text_color ='#fff',symbol_size=8, is_visualmap=True)
 geo.show_config()
 geo.render()
