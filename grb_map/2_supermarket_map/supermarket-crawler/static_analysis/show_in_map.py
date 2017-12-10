@@ -99,7 +99,8 @@ geo = Geo("六大超市全国总和分布图", "家乐福+沃尔玛+大润发+�
 width=1200, height=600, background_color='#404a59')
 attr, value = geo.cast(data)
 
-###  visual_text_color="#fff", 这个设置之后，左边那个图例才有有数字  #000代表'黑'   "#fff"代表'白'
-geo.add("", attr, value, visual_range=[1,90], visual_text_color="#000",is_label_show = True,label_text_color ='#fff',symbol_size=8, is_visualmap=True)
+###  visual_text_color="#fff", 这个设置之后，左边那个图例才有有数字  #000代表'黑'   "#fff"代表'白'  label_text_color决定value值得颜色
+geo.add("", attr, value, visual_range=[1,90], visual_text_color="#fff",is_label_show = True,label_text_size = 8,label_text_color ='#A9A9A9',label_pos = 'right'
+ ,symbol_size=13, is_visualmap=True)
 geo.show_config()
 geo.render()
