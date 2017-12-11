@@ -1,3 +1,11 @@
+'''
+	china_offical_carrefour_format.xlsx统计了每个地级市家乐福的数数目，其它类推。
+	files = ['china_offical_carrefour_format.xlsx','china_offical_markets_walmat_format.xlsx','china_offical_markets_rt_format.xlsx'\
+		,'china_offical_metro_format.xlsx','china_offical_yh_format.xlsx' ,'china_offical_huarun_format.xlsx']
+
+	现在的目的是统计每个地级市各种品牌超市之和。
+'''
+
 from openpyxl import load_workbook
 import codecs,csv
 
