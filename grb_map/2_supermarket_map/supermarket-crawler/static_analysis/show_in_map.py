@@ -58,12 +58,14 @@ def get_city(format_city):
 	else:
 		#print('else')
 		#print(format_city)    ### 注意这里的正则,广东省广州市 这类广州市就又'州'又有'市',所以这里为.+ 不能加?
-		city = re.match(r'.+?[省|区](.+)[市|州|盟]', format_city).group(1)
+		city = re.match(r'.+?[省|区](.+[市|州|盟])', format_city).group(1)
 		#print('city = ',city)
+		
+		f.write(city+'\n')
 		return city
 
 def get_data_from_csvfile():
-	csvfile = 'china_offical_markets_total1.csv'
+	csvfile = 'china_offical_markets_total.csv'
 
 	with codecs.open(csvfile, 'r+', encoding='utf-8') as f:
 		lines = f.readlines()
@@ -75,7 +77,7 @@ def get_data_from_csvfile():
 			list_line = line.split(',')[0:2]
 			list_line[1]=int(list_line[1])  ### 必须要把字符转为Int
 			#print('#### list_line = ',list_line)
-			list_line[0] = get_city(list_line[0])  ### 从浙江省杭州市提取'杭州'
+			list_line[0] = get_city(list_line[0])  ### 从浙江省杭州市提取'杭州市'
 			list_line = tuple(list_line)  ### 转为tuple
 			#print('#### list_line2 = ',list_line)
 			#print('--------list_line[0]= \n',list_line[0])
@@ -90,6 +92,7 @@ def get_data_from_csvfile():
 			data.append(list_line)
 		print(data)
 		return data
+f = open('citys_log.txt','w+')
 data = get_data_from_csvfile()
 #print(data)
 #data = [['上海', '85'], ['成都', '66'], ['北京', '80'], ['沈阳', '37'], ['昆明', '29']]
