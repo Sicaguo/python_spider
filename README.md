@@ -1,24 +1,51 @@
-# python_spider
+# ModernWebPrograming
 
-python爬虫学习集合，包括我学过的别人的源码，还有自己写的。
+Editor: Weihong, Lin
 
-原创的：
-grb_map/2_supermarket_map/supermarket-crawler/        爬取各大零售超市全国门店分布     
+Latest modify: Mon Oct 10 8:53PM
 
-![Alt text](https://github.com/grb2015/python_spider/tree/master/grb_map/2_supermarket_map/supermarket-crawler/static_analysis/六大超市全国总和分布图_地级市.png)
-
-
-
-
+---
 
 ## INTRODUCTION
-python爬虫学习集合，包括我学过的别人的源码，还有自己写的。
+As we know, web is very popular nowadays. It is related to our life in all respects such as solving the problems, shopping, sending emails and so on. In order to catch its steps, I begin to learn web knowledge through the web-class in SYSU. Here are some web projects realized by myself. I will be very pleasure to hear from you to guide me to a better place.And my personal infos are as follows:
 
+**Name: Weihong, Lin**
+
+**College: SYSU**
+
+**Email: 675176683@qq.com**
+
+**blog:  [linwh8](http://write.blog.csdn.net/postlist)**
 
 ##Project
-原创的：
-1.grb_map/2_supermarket_map/supermarket-crawler/        爬取各大零售超市全国门店分布     
+###1.Recipe
  **Effect drawing:**
- ![image](https://github.com/grb2015/python_spider/tree/master/grb_map/2_supermarket_map/supermarket-crawler/static_analysis/city.png)
+ ![index](https://github.com/linwh8/ModernWebPrograming/raw/master/My_image/recipe_index.png)
+ ![recipe1](https://github.com/linwh8/ModernWebPrograming/raw/master/My_image/recipe.png)
+ ![recipe2](https://github.com/linwh8/ModernWebPrograming/raw/master/My_image/recipe_1.png)
 
+###2.Movie
+ **Effect drawing:**
+ ![movie](https://github.com/linwh8/ModernWebPrograming/raw/master/My_image/movie.png)
 
+###3.Ring-menu
+ **Effect drawing:**
+ ![Ring-menu](https://github.com/linwh8/ModernWebPrograming/raw/master/My_image/ring_menu.png)
+ ![Ring-menu-active](https://github.com/linwh8/ModernWebPrograming/raw/master/My_image/ring_menu_active.png)
+ 
+###4.Calculator
+
+ **Effect drawing:**
+ ![简单计算器](https://github.com/linwh8/ModernWebPrograming/raw/master/My_image/Calculator.png)
+ 
+###5.maze
+ **Effect drawing:**
+ ![maze](https://github.com/linwh8/ModernWebPrograming/raw/master/My_image/maze.png)
+ 
+###6.mole
+ **Effect drawing:**
+  ![mole](https://github.com/linwh8/ModernWebPrograming/raw/master/My_image/mole.png)
+ 
+###7.puzzle
+ **Effect drawing:**
+  ![mole](https://github.com/linwh8/ModernWebPrograming/raw/master/My_image/puzzle.png)
