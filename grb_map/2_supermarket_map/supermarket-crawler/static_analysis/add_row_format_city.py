@@ -34,7 +34,13 @@ def add_city_to_csv(market_name,csvfile):
 
 			format_addr1 = result.group(1) ###   安徽省   重庆市 
 			format_addr2 = result.group(2) ###   合肥市   渝北区
-			format_addr3 = format_addr3  ###　肥东县   渝北区
+			if (format_addr3 in ['鼓楼区','江北区','白云区','新华区','桥西区','海州区','通州区',\
+			'桥东区','长安区','西安区','铁西区','青山区','向阳区','和平区','普陀区','河东区','宝山区',\
+			'铁东区','城关区','朝阳区','市中区','西湖区','永定区','城中区','南山区','新城区']):  ## (徐州 南京 福州 都有鼓楼区)  (重庆宁波都有江北区) 还有其他很多
+				if(format_addr1  in ['北京市','上海市','天津市','重庆市']):
+					format_addr3 = format_addr1+format_addr3
+				else:
+					format_addr3 = format_addr2+format_addr3
 
 			info_list.append(format_addr1)
 			info_list.append(format_addr2)
