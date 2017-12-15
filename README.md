@@ -1,21 +1,22 @@
 # ModernWebPrograming
 
-Editor: Weihong, Lin
+Editor: rbguo
 
 Latest modify: Mon Oct 10 8:53PM
 
 ---
 
 ## INTRODUCTION
-As we know, web is very popular nowadays. It is related to our life in all respects such as solving the problems, shopping, sending emails and so on. In order to catch its steps, I begin to learn web knowledge through the web-class in SYSU. Here are some web projects realized by myself. I will be very pleasure to hear from you to guide me to a better place.And my personal infos are as follows:
+爬虫学习
+1.抓取全国零售大卖场门店并地图显示  ![link](https://github.com/grb2015/python_spider/tree/master/grb_map/2_supermarket_map/supermarket-crawler)
 
-**Name: Weihong, Lin**
+**Name: rbguo**
 
-**College: SYSU**
+**College: ...**
 
-**Email: 675176683@qq.com**
+**Email: 949409706@qq.com**
 
-**blog:  [linwh8](http://write.blog.csdn.net/postlist)**
+**blog:  ...**
 
 ##Project
 ###1.Recipe
