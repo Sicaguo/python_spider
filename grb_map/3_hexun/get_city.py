@@ -93,26 +93,46 @@ def format_addr(csvfile):
 		info_list = []
 		#info_list.append(list_line[0])
 		print('list_line [7] =',addr )
-		re_result =  re.match(r'(.+?自治区|.+?市|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县).+?',addr)   ### 浙江省绍兴市杭州湾上虞经济技术开发区
+		re_result =  re.match(r'(.+?自治区|.+?市|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县).+?',addr)   ### 浙江省湖州市德清县武康镇志远北路636号
 		if  re_result:  ### 内蒙古自治区鄂尔多斯市东胜区罕台轻纺街1号
-			province = re_result.group (1)													     ### 浙江省绍兴市杭州湾上虞经济技术开发区
+			province = re_result.group (1)													     
 			city = re_result.group (2)
-			region = re_result.group (3)														### 浙江省湖州市德清县武康镇志远北路636号
-		elif re.match(r'(.+?自治区|.+?市|.+?省)(.+?区|.+?市|.+?县).+?',addr):  ## 上海市松江区思贤路3600号  
-			province = re.match(r'(.+?自治区|.+?市|.+?省)(.+?区|.+?市|.+?县).+?',addr).group (1)										## 成都市双流区西航港街道成新大件路289号也会被收录										   
-			city = re.match(r'(.+?自治区|.+?市|.+?省)(.+?区|.+?市|.+?县).+?',addr).group (2)   
-			region= ' '
-		elif addr:  ### 如果不为空  通过百度地图提取试一下
+			region = re_result.group (3)														
+		elif re.match(r'(.+?市).+?',addr):  ##   处理直辖市
+			 if re.match(r'(.+?市).+?',addr).group(1)  in ('北京市','天津市','上海市','重庆市'):  #### 上海市松江区思贤路3600号 
+			 	if re.match(r'(.+?市)(.+?区|.+?县).+?',addr):  
+			 		province = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (1)
+			 		city = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (2)
+			 		region= ' '
+			 		else:  ### 深圳市南山区深南大道2号   长沙市高新区文轩路2号  上海市浦东大道1号
+			 			if  re.match(r'(.+?路).+?',addr):
+			 				addr =  re.match(r'(.+?路).+?',addr).group(1)
+			 			elif re.match(r'(.+?大道).+?',addr):
+			 				addr =  re.match(r'(.+?大道).+?',addr).group(1)
+			 			format_city = get_format_addr_by_map(addr,ak)
+			 			if re.match(r'(.+?市)(.+?区|.+?县).+?',format_city):   ##   处理直辖市
+							province = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (1)										## 成都市双流区西航港街道成新大件路289号也会被收录										   
+							city = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (2)   
+							region= ' '
+						else:
+							province = format_city
+							city = ' '
+							region = ' '
+		elif addr:  ### 如果不为空  通过百度地图提取试一下   
+			if  re.match(r'(.+?路).+?',addr):
+				addr =  re.match(r'(.+?路).+?',addr).group(1)
+			elif re.match(r'(.+?大道).+?',addr):
+				addr =  re.match(r'(.+?大道).+?',addr).group(1)
 			format_city = get_format_addr_by_map(addr,ak)
 			re_result =  re.match(r'(.+?自治区|.+?市|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县).+?',format_city)   ### 浙江省绍兴市杭州湾上虞经济技术开发区
-			if  re_result:  ### 内蒙古自治区鄂尔多斯市东胜区罕台轻纺街1号
-				province = re_result.group (1)													     ### 浙江省绍兴市杭州湾上虞经济技术开发区
+			if  re_result:  ### 浙江省湖州市德清县武康镇志远北路636号
+				province = re_result.group (1)													    
 				city = re_result.group (2)
-				region = re_result.group (3)														### 浙江省湖州市德清县武康镇志远北路636号
-			elif re.match(r'(.+?自治区|.+?市|.+?省)(.+?区|.+?市|.+?县).+?',format_city):  ## 上海市松江区思贤路3600号  
-				province = re.match(r'(.+?自治区|.+?市|.+?省)(.+?区|.+?市|.+?县).+?',format_city).group (1)										## 成都市双流区西航港街道成新大件路289号也会被收录										   
-				city = re.match(r'(.+?自治区|.+?市|.+?省)(.+?区|.+?市|.+?县).+?',format_city).group (2)   
-				region= ' '
+				region = re_result.group (3)														
+			elif re.match(r'(.+?市)(.+?区|.+?县).+?',format_city):   ##   处理直辖市
+						province = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (1)										## 成都市双流区西航港街道成新大件路289号也会被收录										   
+						city = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (2)   
+						region= ' '
 			else:
 				province = format_city
 				city = ' '
