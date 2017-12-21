@@ -71,7 +71,7 @@ def  get_format_addr_by_map(addr,ak):  ###
 
 
 def format_addr(csvfile):
-	with open(csvfile,'r+') as f:
+	with codecs.open(csvfile,'r+',encoding='utf-8') as f:
 		lines = f.readlines()
 	addrs=[]
 	for line in lines[1:]:
@@ -92,48 +92,37 @@ def format_addr(csvfile):
 
 		info_list = []
 		#info_list.append(list_line[0])
-		print('list_line [7] =',addr )
-		re_result =  re.match(r'(.+?自治区|.+?市|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县).+?',addr)   ### 浙江省湖州市德清县武康镇志远北路636号
+		print('list_line [-3] =',addr )   #### 处理省，自治区
+		re_result =  re.match(r'(.+?自治区|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县).*?',addr)   ### 浙江省湖州市德清县武康镇志远北路636号
 		if  re_result:  ### 内蒙古自治区鄂尔多斯市东胜区罕台轻纺街1号
 			province = re_result.group (1)													     
 			city = re_result.group (2)
-			region = re_result.group (3)														
-		elif re.match(r'(.+?市).+?',addr):  ##   处理直辖市
-			 if re.match(r'(.+?市).+?',addr).group(1)  in ('北京市','天津市','上海市','重庆市'):  #### 上海市松江区思贤路3600号 
-			 	if re.match(r'(.+?市)(.+?区|.+?县).+?',addr):  
-			 		province = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (1)
-			 		city = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (2)
-			 		region= ' '
-			 		else:  ### 深圳市南山区深南大道2号   长沙市高新区文轩路2号  上海市浦东大道1号
-			 			if  re.match(r'(.+?路).+?',addr):
-			 				addr =  re.match(r'(.+?路).+?',addr).group(1)
-			 			elif re.match(r'(.+?大道).+?',addr):
-			 				addr =  re.match(r'(.+?大道).+?',addr).group(1)
-			 			format_city = get_format_addr_by_map(addr,ak)
-			 			if re.match(r'(.+?市)(.+?区|.+?县).+?',format_city):   ##   处理直辖市
-							province = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (1)										## 成都市双流区西航港街道成新大件路289号也会被收录										   
-							city = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (2)   
-							region= ' '
-						else:
-							province = format_city
-							city = ' '
-							region = ' '
-		elif addr:  ### 如果不为空  通过百度地图提取试一下   
+			region = re_result.group (3)	
+			## 深圳市南山区深南大道2号   长沙市高新区文轩路2号  上海市浦东大道1号 													
+		elif re.match(r'(.+?市)(.+?区|.+?县).+?',addr)  and  re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group(1) in ('北京市','天津市','上海市','重庆市'):  ##   处理直辖市
+			 province = re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group (1)
+			 city = re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group (2)
+			 region= ' '
+		elif addr:  ### 如果不为空，可以用百度地图来格式化一下   精确到路，这是最好的，不要精确到'号'
 			if  re.match(r'(.+?路).+?',addr):
 				addr =  re.match(r'(.+?路).+?',addr).group(1)
 			elif re.match(r'(.+?大道).+?',addr):
 				addr =  re.match(r'(.+?大道).+?',addr).group(1)
+			elif re.match(r'(.+?街道).+?',addr):
+				addr =  re.match(r'(.+?街道).+?',addr).group(1)
+			elif re.match(r'(.+?镇).+?',addr):
+				addr =  re.match(r'(.+?镇).+?',addr).group(1)
 			format_city = get_format_addr_by_map(addr,ak)
-			re_result =  re.match(r'(.+?自治区|.+?市|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县).+?',format_city)   ### 浙江省绍兴市杭州湾上虞经济技术开发区
+			re_result =  re.match(r'(.+?自治区|.+?市|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县).*?',format_city)   ### 浙江省绍兴市杭州湾上虞经济技术开发区
 			if  re_result:  ### 浙江省湖州市德清县武康镇志远北路636号
 				province = re_result.group (1)													    
 				city = re_result.group (2)
 				region = re_result.group (3)														
-			elif re.match(r'(.+?市)(.+?区|.+?县).+?',format_city):   ##   处理直辖市
-						province = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (1)										## 成都市双流区西航港街道成新大件路289号也会被收录										   
-						city = re.match(r'(.+?市)(.+?区|.+?县).+?',addr).group (2)   
+			elif re.match(r'(.+?市)(.+?区|.+?县).*?',format_city):   ##   处理直辖市
+						province = re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group (1)										## 成都市双流区西航港街道成新大件路289号也会被收录										   
+						city = re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group (2)   
 						region= ' '
-			else:
+			else:  ### 万一格式化的地址也是不标准的
 				province = format_city
 				city = ' '
 				region = ' '
@@ -214,7 +203,7 @@ def format_addr(csvfile):
 
 	'''	
 	try:
-		print('#### addrs = ',addrs)   #### 格式化地址
+		#print('#### addrs = ',addrs)   #### 格式化地址
 		with codecs.open(csvfile[:-4]+'_formataddr.txt', 'w+', encoding='utf-8') as f:
 			writer = csv.writer(f)
 			writer.writerow(["省","市","县"])
@@ -223,9 +212,10 @@ def format_addr(csvfile):
 	
 	except:
 		pass 
+	'''
 	finally:
 
-		with open(csvfile,'r+') as f:
+		with codecs.open(csvfile,'r+', encoding='utf-8') as f:
 			lines = f.readlines()
 		with codecs.open(csvfile[:-4]+'_format.csv', 'w+', encoding='utf-8') as market_file:
 			writer = csv.writer(market_file)
@@ -239,6 +229,7 @@ def format_addr(csvfile):
 				list_line.append(addrs[i][2])
 				writer.writerow(list_line)
 				i = i+1 
+	'''
 			
 if __name__ == '__main__':
 	#csvfiles = ["china_offical_metro.csv","china_offical_markets_walmat.csv","china_offical_markets_rt.csv"]
