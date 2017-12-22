@@ -2,6 +2,8 @@
 
 '''
 	从获取csv数据中提取出所属的省 市 县
+
+	得到的数据可以用excel进行排序，需要注意的是，excel排序要把所有的列都选上,并且要把省份放在第一列。
 '''
 import re
 import codecs
@@ -74,7 +76,7 @@ def format_addr(csvfile):
 	with codecs.open(csvfile,'r+',encoding='utf-8') as f:
 		lines = f.readlines()
 	addrs=[]
-	for line in lines[1:]:
+	for line in lines[-19:-1]:
 		line = line.strip()
 		list_line = line.split(',')
 		print(list_line)       
@@ -92,8 +94,8 @@ def format_addr(csvfile):
 
 		info_list = []
 		#info_list.append(list_line[0])
-		print('list_line [-3] =',addr )   #### 处理省，自治区
-		re_result =  re.match(r'(.+?自治区|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县).*?',addr)   ### 浙江省湖州市德清县武康镇志远北路636号
+		print('list_line [-3] =',addr )   #### 处理省，自治区 
+		re_result =  re.match(r'(.+?自治区|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县|.+?旗).*?',addr)   ### 浙江省湖州市德清县武康镇志远北路636号
 		if  re_result:  ### 内蒙古自治区鄂尔多斯市东胜区罕台轻纺街1号
 			province = re_result.group (1)													     
 			city = re_result.group (2)
@@ -104,16 +106,27 @@ def format_addr(csvfile):
 			 city = re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group (2)
 			 region= ' '
 		elif addr:  ### 如果不为空，可以用百度地图来格式化一下   精确到路，这是最好的，不要精确到'号'
-			if  re.match(r'(.+?路).+?',addr):
+			if  re.match(r'(.+?县).+?',addr):
+				addr =  re.match(r'(.+?县).+?',addr).group(1)
+			elif  re.match(r'(.+?区).+?',addr):
+				addr =  re.match(r'(.+?区).+?',addr).group(1)
+			elif re.match(r'(.+?镇).+?',addr):
+				addr =  re.match(r'(.+?镇).+?',addr).group(1)
+			elif  re.match(r'(.+?路).+?',addr):
 				addr =  re.match(r'(.+?路).+?',addr).group(1)
 			elif re.match(r'(.+?大道).+?',addr):
 				addr =  re.match(r'(.+?大道).+?',addr).group(1)
 			elif re.match(r'(.+?街道).+?',addr):
 				addr =  re.match(r'(.+?街道).+?',addr).group(1)
-			elif re.match(r'(.+?镇).+?',addr):
-				addr =  re.match(r'(.+?镇).+?',addr).group(1)
+			elif re.match(r'(.+?街).+?',addr):
+				addr =  re.match(r'(.+?街).+?',addr).group(1)
+			elif re.match(r'(.+?园).+?',addr):  ## 工业园
+				addr =  re.match(r'(.+?园).+?',addr).group(1)
+			elif re.match(r'(.+?号).+?',addr):  ## 工业园
+				addr =  re.match(r'(.+?号).+?',addr).group(1)
+			
 			format_city = get_format_addr_by_map(addr,ak)
-			re_result =  re.match(r'(.+?自治区|.+?市|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县).*?',format_city)   ### 浙江省绍兴市杭州湾上虞经济技术开发区
+			re_result =  re.match(r'(.+?自治区|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县|.+?旗).*?',format_city)   ### 浙江省绍兴市杭州湾上虞经济技术开发区
 			if  re_result:  ### 浙江省湖州市德清县武康镇志远北路636号
 				province = re_result.group (1)													    
 				city = re_result.group (2)
@@ -242,5 +255,5 @@ if __name__ == '__main__':
 	#	print(csvfiles[i])
 	#	print(market_names[i])
 	#	format_addr(csvfiles[i],market_names[i])
-	csvfile = "all_province_commanpy_info_all_country.csv"
+	csvfile = "all_province_commanpy_info_all_country_formated_addr2.csv"
 	format_addr(csvfile)
