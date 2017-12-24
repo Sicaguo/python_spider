@@ -2,7 +2,7 @@
 # @Author: Teiei
 # @Date:   2017-12-23 11:04:40
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-12-24 15:19:52
+# @Last Modified time: 2017-12-24 15:33:31
 # 
 #  brief
 #  1.画一个省所有地级市的图，比如宁波市，画的就是宁波市市各区的上市公司
@@ -46,6 +46,15 @@ def get_city_set(list_lines,index):
 		if city:
 			cities.add(city)
 	return cities
+###  从表格中获取Index列的不同的值，返回一个set
+def get_unique_item_set(list_lines,index):
+	unique_items_set = set([])
+	for list_line in list_lines:
+		#print(list_line)
+		item = list_line[index]   ### 
+		if item:
+			unique_items_set.add(item)
+	return unique_items_set
 
 ####  list_lines是一个csv的list形式   这个函数做的类似于数据透视表  index = -3 统计地级市，-2统计县
 def get_labes_data(list_lines,index):  ### 比如如果这个csv是杭州的话  
@@ -61,7 +70,20 @@ def get_labes_data(list_lines,index):  ### 比如如果这个csv是杭州的话
 		dict_city_commany_num[region] = dict_city_commany_num[region] +1
 	print(dict_city_commany_num)
 	return dict_city_commany_num
-	
+####  从list_lines表格中获取第index列的数据透视表
+####  index = -2 则获取的是一个市所有的县的上市公司透视表{'滨江区':22,'上河区'：12...}
+#	  index = 3  获取的是一个市所有行业的数据透视表 {‘互联网’：9,'制药':8}
+def get_unique_item_amount_dict(list_lines,index):	
+	dict_colurmn_index = {}
+	unique_items = get_unique_item_set(list_lines,index)
+	for item in unique_items:     
+		dict_colurmn_index[item]=0 ####  初始化为0
+	for list_line in list_lines:
+		item = list_line[index]
+		dict_city_commany_num[item] = dict_city_commany_num[item] +1
+	print(dict_colurmn_index)
+	return dict_colurmn_index	
+
 def autolabel(rects):  
     for rect in rects:  
         height = rect.get_height()   ### plt.text第一个参数 (横坐标 ,纵坐标，要写的文本....)
@@ -151,7 +173,7 @@ def watermark(imageFile):
 
 	#另存图片
 	im1.save(imageFile[:-4]+"_watermark.png")
-def draw_graph(city):
+def draw_graph(city):     #### 这里的city 是 地级市
 	csvfile = '.\\'+city+'\\'+city+'.csv'
 	print(csvfile)
 	list_lines =  get_list_lines_from_csv(csvfile)
