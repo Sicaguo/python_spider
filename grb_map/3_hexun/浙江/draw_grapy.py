@@ -2,7 +2,7 @@
 # @Author: Teiei
 # @Date:   2017-12-23 11:04:40
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-12-24 14:32:54
+# @Last Modified time: 2017-12-24 15:19:52
 # 
 #  brief
 #  1.画一个省所有地级市的图，比如宁波市，画的就是宁波市市各区的上市公司
@@ -119,6 +119,16 @@ def barh_plot2(labels,data,city):
 	    #fig = plt.figure()
 	    
 	   # plt.savefig(city+'.png')
+###  画扇形图
+def draw_pie(labels,data,city):
+	plt.rcParams['font.sans-serif'] = ['SimHei']
+	plt.rcParams['axes.unicode_minus'] = False
+
+	fig = plt.figure(figsize=(8,8)) 
+	plt.pie(data,labels=labels,autopct='%1.1f%%',labeldistance = 1.16,pctdistance = 1.07,radius=1.1) #画饼图（数据，数据对应的标签，百分数保留两位小数点
+	plt.title(city+'各辖区各辖区上市公司数量')
+	plt.savefig('.\\'+city+'\\'+city+'_pie.png',dpi=150)
+	plt.show()
 
 def get_jpg_type_file(path, list_name):  
     for file in os.listdir(path):  
@@ -157,9 +167,11 @@ def draw_graph(city):
 		print(item)
 		labels.append(item[0])
 		data.append(item[1])
-	barh_plot1(labels,data,city)
+	#barh_plot1(labels,data,city)
+	draw_pie(labels,data,city)
 if __name__ == '__main__':
 	
+	'''
 	list_lines = get_list_lines_from_csv('zhejiang.csv') 
 	cities = get_city_set(list_lines,-3)
 	for city in cities:
@@ -172,6 +184,6 @@ if __name__ == '__main__':
 		print(image)
 		watermark(image)
 	
-	
+	'''
 	#draw_graph('舟山市')
-	#draw_graph('杭州市')
+	draw_graph('杭州市')
