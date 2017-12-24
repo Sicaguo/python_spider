@@ -2,9 +2,11 @@
 # @Author: Teiei
 # @Date:   2017-12-23 11:04:40
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-12-24 09:38:49
+# @Last Modified time: 2017-12-24 14:32:54
 # 
-#  brief 画一个省所有地级市的图，比如宁波市，画的就是宁波市市各区的上市公司
+#  brief
+#  1.画一个省所有地级市的图，比如宁波市，画的就是宁波市市各区的上市公司
+#  2.画每个地级市的上市公司行业分布的扇形图
 import numpy as np    
 import matplotlib.mlab as mlab    
 import matplotlib.pyplot as plt  
@@ -88,9 +90,10 @@ def barh_plot1(labels,data,city):
 	    plt.ylabel('城市')
 	    plt.title(city+'各辖区上市公司数量')
 	    autolabel_0(rect) 
-	    plt.savefig('.\\'+city+'\\'+city+'.jpg',dpi=150)  ### dpi是设置像素
-	    plt.savefig(city+'.jpg',dpi=150)  ### dpi是设置像素
+	    plt.savefig('.\\'+city+'\\'+city+'.png',dpi=150)  ### dpi是设置像素
+	    plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
+#### 横的条形图
 def barh_plot2(labels,data,city): 
 	    plt.rcParams['font.sans-serif'] = ['SimHei']
 	    plt.rcParams['axes.unicode_minus'] = False
@@ -109,20 +112,21 @@ def barh_plot2(labels,data,city):
 
 	    plt.title(city+'各辖区各辖区上市公司数量')
 	    autolabel(rect)  
-	    plt.savefig('.\\'+city+'\\'+city+'.jpg',dpi=150)
-	    plt.savefig(city+'.jpg',dpi=150)  ### dpi是设置像素
+	    plt.savefig('.\\'+city+'\\'+city+'.png',dpi=150)
+	    plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 	    #
 	    #fig = plt.figure()
 	    
 	   # plt.savefig(city+'.png')
-def get_jpg_type_file(path): 
-	list_name = []
-	for file in os.listdir(path):
-		file_path = os.path.join(path, file)
-		if os.path.splitext(file_path)[1]=='.jpg':
-			list_name.append(file_path)
-	return list_name
+
+def get_jpg_type_file(path, list_name):  
+    for file in os.listdir(path):  
+        file_path = os.path.join(path, file)  
+        if os.path.isdir(file_path):  
+            get_jpg_type_file(file_path, list_name)  
+        elif os.path.splitext(file_path)[1] in ['.png','.jpg'] :  
+            list_name.append(file_path)  
 def watermark(imageFile):
 	#设置所使用的字体
 	font = ImageFont.truetype("c:/Windows/fonts/simsun.ttc", 20)
@@ -136,7 +140,7 @@ def watermark(imageFile):
 	draw = ImageDraw.Draw(im1)                          #Just draw it!
 
 	#另存图片
-	im1.save(imageFile[:-4]+"_watermark.jpg")
+	im1.save(imageFile[:-4]+"_watermark.png")
 def draw_graph(city):
 	csvfile = '.\\'+city+'\\'+city+'.csv'
 	print(csvfile)
@@ -159,9 +163,11 @@ if __name__ == '__main__':
 	list_lines = get_list_lines_from_csv('zhejiang.csv') 
 	cities = get_city_set(list_lines,-3)
 	for city in cities:
-		#print(city)
+		print(city)
 		draw_graph(city)
-	img_list = get_jpg_type_file('.')
+	img_list = []
+	get_jpg_type_file('.',img_list)
+	print('img_list = ',img_list)
 	for image in img_list:
 		print(image)
 		watermark(image)
