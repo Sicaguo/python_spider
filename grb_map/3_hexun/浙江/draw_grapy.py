@@ -2,7 +2,7 @@
 # @Author: Teiei
 # @Date:   2017-12-23 11:04:40
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-12-24 15:33:31
+# @Last Modified time: 2017-12-24 16:01:22
 # 
 #  brief
 #  1.画一个省所有地级市的图，比如宁波市，画的就是宁波市市各区的上市公司
@@ -80,7 +80,7 @@ def get_unique_item_amount_dict(list_lines,index):
 		dict_colurmn_index[item]=0 ####  初始化为0
 	for list_line in list_lines:
 		item = list_line[index]
-		dict_city_commany_num[item] = dict_city_commany_num[item] +1
+		dict_colurmn_index[item] = dict_colurmn_index[item] +1
 	print(dict_colurmn_index)
 	return dict_colurmn_index	
 
@@ -146,11 +146,11 @@ def draw_pie(labels,data,city):
 	plt.rcParams['font.sans-serif'] = ['SimHei']
 	plt.rcParams['axes.unicode_minus'] = False
 
-	fig = plt.figure(figsize=(8,8)) 
-	plt.pie(data,labels=labels,autopct='%1.1f%%',labeldistance = 1.16,pctdistance = 1.07,radius=1.1) #画饼图（数据，数据对应的标签，百分数保留两位小数点
-	plt.title(city+'各辖区各辖区上市公司数量')
+	fig = plt.figure(figsize=(10,10))
+	plt.pie(data,labels=labels,autopct='%1.1f%%',labeldistance = 1.26,pctdistance = 1.05,radius=1.1) #画饼图（数据，数据对应的标签，百分数保留两位小数点
+	plt.title(city+'境内上市公司行业分布')
 	plt.savefig('.\\'+city+'\\'+city+'_pie.png',dpi=150)
-	plt.show()
+	#plt.show()
 
 def get_jpg_type_file(path, list_name):  
     for file in os.listdir(path):  
@@ -176,29 +176,40 @@ def watermark(imageFile):
 def draw_graph(city):     #### 这里的city 是 地级市
 	csvfile = '.\\'+city+'\\'+city+'.csv'
 	print(csvfile)
-	list_lines =  get_list_lines_from_csv(csvfile)
+	list_lines =  get_list_lines_from_csv(csvfile)   ### 将csv文件提取为list
 	#print(list_lines)
-	dict_city_commany_num = get_labes_data(list_lines,-2)
+	#dict_city_commany_num = get_labes_data(list_lines,-2)
+	dict_item = get_unique_item_amount_dict(list_lines,2)  ### 获取第二列的数据透视表
 	labels = []
 	data=[]
+	dict_item = sorted(dict_item.items(),key=lambda item :item[1],reverse = True)
+	print(dict_item)
+	for item in dict_item:
+		print(item)
+		labels.append(item[0])
+		data.append(item[1])
+
 	####  将dict 按 value排序  返回是一个list 
 	#list_city_commany_num = sorted(dict_city_commany_num.items(),key=lambda item :item[1],reverse = True)
+	'''
 	list_city_commany_num = sorted(dict_city_commany_num.items(),key=lambda item :item[1])
 	print(list_city_commany_num)
 	for item in list_city_commany_num:
 		print(item)
 		labels.append(item[0])
 		data.append(item[1])
+	'''
 	#barh_plot1(labels,data,city)
 	draw_pie(labels,data,city)
 if __name__ == '__main__':
 	
-	'''
+	
 	list_lines = get_list_lines_from_csv('zhejiang.csv') 
 	cities = get_city_set(list_lines,-3)
 	for city in cities:
 		print(city)
 		draw_graph(city)
+	### 增加水印
 	img_list = []
 	get_jpg_type_file('.',img_list)
 	print('img_list = ',img_list)
@@ -206,6 +217,7 @@ if __name__ == '__main__':
 		print(image)
 		watermark(image)
 	
-	'''
+	
 	#draw_graph('舟山市')
-	draw_graph('杭州市')
+	#draw_graph('宁波市')
+	#draw_graph('杭州市')
