@@ -150,11 +150,12 @@ def format_addr(csvfile,index):
 		return cities	
 	####  统计每个县的信息，单独存放在一个csv文件中
 	elif index == -2: 
-		for region in cities:    ### 这里的city就是县了,通过映射看属于哪个区，以便创建文件夹
+		for region in cities:    ### 这里的region就是县了,通过映射看属于哪个市，以便创建文件夹
 			city = dict_city_region[region]
 			Dir = '.\\'+city+'\\'+region   ### .\绍兴市\诸暨市
-			mkdir(city)
-			path = Dir + '.csv'
+			mkdir(Dir)
+			path = Dir + '\\'+region+'.csv' ### .\绍兴市\诸暨市\诸暨市.csv
+			
 			with codecs.open(path, 'w+', encoding='utf-8') as f:
 				writer = csv.writer(f)
 				writer.writerow(["公司简称","公司全名","行业","所在省","注册地","办公地","官网","上市日期"])
@@ -213,6 +214,6 @@ if __name__ == '__main__':
 	#csvfile = "china_offical_markets_walmat_format.csv"  
 	
 	csvfile = "zhejiang.csv" 
-	cities = format_addr(csvfile,-3)
+	cities = format_addr(csvfile,-3)  ####  这里的csvfile是 zhejiang.csv ,统计每个地级市的信息，单独存放在一个csv文件中
 	for city in cities:
-		format_addr('.\\'+city+'\\'+ city + '.csv',-2)
+		format_addr('.\\'+city+'\\'+ city + '.csv',-2)  #### 统计每个县的信息，单独存放在一个csv文件中
