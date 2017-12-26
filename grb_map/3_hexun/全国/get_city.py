@@ -76,7 +76,7 @@ def format_addr(csvfile):
 	with codecs.open(csvfile,'r+',encoding='utf-8') as f:
 		lines = f.readlines()
 	addrs=[]
-	for line in lines[1:200]:
+	for line in lines[200:]:
 		line = line.strip()
 		list_line = line.split(',')
 		print(list_line)       
@@ -131,7 +131,7 @@ def format_addr(csvfile):
 				province = re_result.group (1)													    
 				city = re_result.group (2)
 				region = re_result.group (3)														
-			elif re.match(r'(.+?市)(.+?区|.+?县).*?',format_city) and  re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group(1) in ('北京市','天津市','上海市','重庆市') and len(re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group (2))<=4:   ##   处理直辖市
+			elif re.match(r'(.+?市)(.+?区|.+?县).*?',format_city) and  re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group(1) in ('北京市','天津市','上海市','重庆市') and len(re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group(2))<=4:   ##   处理直辖市
 						province = re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group (1)										## 成都市双流区西航港街道成新大件路289号也会被收录										   
 						city = re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group (2)   
 						region= ' '
