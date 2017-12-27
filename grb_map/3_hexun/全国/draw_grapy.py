@@ -2,11 +2,13 @@
 # @Author: Teiei
 # @Date:   2017-12-23 11:04:40
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-12-24 16:01:22
+# @Last Modified time: 2017-12-27 21:28:33
 # 
+# TODO 内存会爆
 #  brief
 #  1.画一个省所有地级市的图，比如宁波市，画的就是宁波市市各区的上市公司
 #  2.画每个地级市的上市公司行业分布的扇形图
+import gc
 import numpy as np    
 import matplotlib.mlab as mlab    
 import matplotlib.pyplot as plt  
@@ -150,6 +152,7 @@ def draw_pie(labels,data,city):
 	plt.pie(data,labels=labels,autopct='%1.1f%%',labeldistance = 1.26,pctdistance = 1.05,radius=1.1) #画饼图（数据，数据对应的标签，百分数保留两位小数点
 	plt.title(city+'境内上市公司行业分布')
 	plt.savefig('.\\'+city+'\\'+city+'_pie.png',dpi=150)
+	#plt.savefig('.\\'+city+'_pie.png',dpi=150)
 	#plt.show()
 
 def get_jpg_type_file(path, list_name):  
@@ -172,10 +175,11 @@ def watermark(imageFile):
 	draw = ImageDraw.Draw(im1)                          #Just draw it!
 
 	#另存图片
-	im1.save(imageFile[:-4]+"_watermark.png")
-def draw_graph(city):     #### 这里的city 是 地级市
+	#im1.save(imageFile[:-4]+"_watermark.png")
+	im1.save(imageFile)  ### 覆盖掉原来的
+def draw_graph_bar(city):     #### 这里的city 是 地级市  画一个地级市各区县的条形图
 	csvfile = '.\\'+city+'\\'+city+'.csv'
-	print(csvfile)
+	#print(csvfile)
 	list_lines =  get_list_lines_from_csv(csvfile)   ### 将csv文件提取为list
 	#print(list_lines)
 	#dict_city_commany_num = get_labes_data(list_lines,2)
@@ -183,9 +187,9 @@ def draw_graph(city):     #### 这里的city 是 地级市
 	labels = []
 	data=[]
 	dict_item = sorted(dict_item.items(),key=lambda item :item[1],reverse = True)
-	print(dict_item)
+	#print(dict_item)
 	for item in dict_item:
-		print(item)
+		#print(item)
 		labels.append(item[0])
 		data.append(item[1])
 
@@ -201,6 +205,33 @@ def draw_graph(city):     #### 这里的city 是 地级市
 	'''
 	barh_plot1(labels,data,city)
 	#draw_pie(labels,data,city)
+def draw_graph_pie(city):     #### 这里的city 是 地级市  画一个地级市的行业扇形图
+	csvfile = '.\\'+city+'\\'+city+'.csv'
+	#print(csvfile)
+	list_lines =  get_list_lines_from_csv(csvfile)   ### 将csv文件提取为list
+	#print(list_lines)
+	#dict_city_commany_num = get_labes_data(list_lines,2)
+	dict_item = get_unique_item_amount_dict(list_lines,5)  ### 获取第二列的数据透视表
+	labels = []
+	data=[]
+	dict_item = sorted(dict_item.items(),key=lambda item :item[1],reverse = True)
+	#print(dict_item)
+	for item in dict_item:
+		#print(item)
+		labels.append(item[0])
+		data.append(item[1])
+
+	####  将dict 按 value排序  返回是一个list 
+	#list_city_commany_num = sorted(dict_city_commany_num.items(),key=lambda item :item[1],reverse = True)
+	'''
+	list_city_commany_num = sorted(dict_city_commany_num.items(),key=lambda item :item[1])
+	print(list_city_commany_num)
+	for item in list_city_commany_num:
+		print(item)
+		labels.append(item[0])
+		data.append(item[1])
+	'''
+	draw_pie(labels,data,city)
 
 ####  画一个省的图
 def draw_bar_pie_for_one_province(prov_csvfile):
@@ -209,24 +240,48 @@ def draw_bar_pie_for_one_province(prov_csvfile):
 		cities = get_city_set(list_lines,1)
 		for city in cities:
 			print(city)
-			draw_graph(city)
+			#draw_graph(city)
+			draw_graph_bar(city)
+			draw_graph_pie(city)
 		### 增加水印
 		img_list = []
 		get_jpg_type_file('.',img_list)
-		print('img_list = ',img_list)
+		#print('img_list = ',img_list)
 		for image in img_list:
-			print(image)
+			#print(image)
 			watermark(image)
 if __name__ == '__main__':
 	
+	'''
 	all_country_csvfile = "all_province_commanpy_info_all_country_formated_addr_final.csv"
 	list_lines = get_list_lines_from_csv(all_country_csvfile)    ### 将csv文件转为一个list
 	provinces = get_city_set(list_lines,0)
 	print(provinces)
-	for province in provinces:
+	provinces = list(provinces)
+	print(len(provinces))
+	time.sleep(5)
+	for province in provinces[0:10]:
 		os.chdir(".\\"+province)   #修改当前工作目录
 		pwd = os.getcwd()    #获取当前工作目录 进入到该省	
 		draw_bar_pie_for_one_province(province+'.csv')
 		os.chdir("..")   ### 切换回全国目录
-		
+
+	time.sleep(5)
+	for province in provinces[10:20]:
+		os.chdir(".\\"+province)   #修改当前工作目录
+		pwd = os.getcwd()    #获取当前工作目录 进入到该省	
+		draw_bar_pie_for_one_province(province+'.csv')
+		os.chdir("..")   ### 切换回全国目录
+		time.sleep(5)
+	for province in provinces[20:32]:
+		os.chdir(".\\"+province)   #修改当前工作目录
+		pwd = os.getcwd()    #获取当前工作目录 进入到该省	
+		draw_bar_pie_for_one_province(province+'.csv')
+		os.chdir("..")   ### 切换回全国目录
+	'''
+	province = '广东省'
+	os.chdir(".\\"+province)   #修改当前工作目录
+	pwd = os.getcwd()    #获取当前工作目录 进入到该省	
+	draw_bar_pie_for_one_province(province+'.csv')
+	os.chdir("..")   ### 切换回全国目录
 
