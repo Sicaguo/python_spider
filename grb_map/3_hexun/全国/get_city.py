@@ -96,12 +96,12 @@ def format_addr(csvfile):
 		#info_list.append(list_line[0])
 		print('list_line [-3] =',addr )   #### 处理省，自治区 
 		re_result =  re.match(r'(.+?自治区|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县|.+?旗).*?',addr)   ### 浙江省湖州市德清县武康镇志远北路636号
-		if  re_result and len(re_result.group (3))<=4 :  ### 内蒙古自治区鄂尔多斯市东胜区罕台轻纺街1号
+		if  re_result and len(re_result.group (3))<=3 :  ### 内蒙古自治区鄂尔多斯市东胜区罕台轻纺街1号  不过也误伤了一些少数民族自治县
 			province = re_result.group (1)				#### "园区"这种，浙江省 绍兴市 新昌省级高新技术园区 这种要剔除	 										     
 			city = re_result.group (2)					
 			region = re_result.group (3)	
 			## 深圳市南山区深南大道2号   长沙市高新区文轩路2号  上海市浦东大道1号 													
-		elif re.match(r'(.+?市)(.+?区|.+?县).+?',addr)  and  re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group(1) in ('北京市','天津市','上海市','重庆市') and len(re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group (2)) <=4 :  ##   处理直辖市
+		elif re.match(r'(.+?市)(.+?区|.+?县).+?',addr)  and  re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group(1) in ('北京市','天津市','上海市','重庆市') and len(re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group (2)) <=3 :  ##   处理直辖市
 			 province = re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group (1)
 			 city = re.match(r'(.+?市)(.+?区|.+?县).*?',addr).group (2)
 			 region= city
@@ -124,14 +124,17 @@ def format_addr(csvfile):
 				addr =  re.match(r'(.+?园).+?',addr).group(1)
 			elif re.match(r'(.+?号).+?',addr):  ## 工业园
 				addr =  re.match(r'(.+?号).+?',addr).group(1)
+			elif re.match(r'(.+?地区).+?',addr):  ## 西藏山南地区
+				addr =  re.match(r'(.+?地区).+?',addr).group(1)
+
 			
 			format_city = get_format_addr_by_map(addr,ak)
 			re_result =  re.match(r'(.+?自治区|.+?省)(.+?自治州|.+?市|.+?盟)(.+?区|.+?市|.+?县|.+?旗).*?',format_city)   ### 浙江省绍兴市杭州湾上虞经济技术开发区
-			if  re_result and len(re_result.group (3))<=4 :  ### 浙江省湖州市德清县武康镇志远北路636号
+			if  re_result :  ### 浙江省湖州市德清县武康镇志远北路636号
 				province = re_result.group (1)													    
 				city = re_result.group (2)
 				region = re_result.group (3)														
-			elif re.match(r'(.+?市)(.+?区|.+?县).*?',format_city) and  re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group(1) in ('北京市','天津市','上海市','重庆市') and len(re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group(2))<=4:   ##   处理直辖市
+			elif re.match(r'(.+?市)(.+?区|.+?县).*?',format_city) and  re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group(1) in ('北京市','天津市','上海市','重庆市') :   ##   处理直辖市
 						province = re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group (1)										## 成都市双流区西航港街道成新大件路289号也会被收录										   
 						city = re.match(r'(.+?市)(.+?区|.+?县).*?',format_city).group (2)   
 						region= city
