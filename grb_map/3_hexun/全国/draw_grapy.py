@@ -113,7 +113,7 @@ def barh_plot1(labels,data,city):
 	    plt.title(city+'各辖区上市公司数量')
 	    autolabel_0(rect) 
 	    plt.savefig('.\\'+city+'\\'+city+'.png',dpi=150)  ### dpi是设置像素
-	    plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
+	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 #### 横的条形图
 def barh_plot2(labels,data,city): 
@@ -135,7 +135,7 @@ def barh_plot2(labels,data,city):
 	    plt.title(city+'各辖区各辖区上市公司数量')
 	    autolabel(rect)  
 	    plt.savefig('.\\'+city+'\\'+city+'.png',dpi=150)
-	    plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
+	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 	    #
 	    #fig = plt.figure()
@@ -199,25 +199,34 @@ def draw_graph(city):     #### 这里的city 是 地级市
 		labels.append(item[0])
 		data.append(item[1])
 	'''
-	#barh_plot1(labels,data,city)
-	draw_pie(labels,data,city)
+	barh_plot1(labels,data,city)
+	#draw_pie(labels,data,city)
+
+####  画一个省的图
+def draw_bar_pie_for_one_province(prov_csvfile):
+
+		list_lines = get_list_lines_from_csv(prov_csvfile) 
+		cities = get_city_set(list_lines,1)
+		for city in cities:
+			print(city)
+			draw_graph(city)
+		### 增加水印
+		img_list = []
+		get_jpg_type_file('.',img_list)
+		print('img_list = ',img_list)
+		for image in img_list:
+			print(image)
+			watermark(image)
 if __name__ == '__main__':
 	
-	
-	list_lines = get_list_lines_from_csv('浙江省.csv') 
-	cities = get_city_set(list_lines,1)
-	for city in cities:
-		print(city)
-		draw_graph(city)
-	### 增加水印
-	img_list = []
-	get_jpg_type_file('.',img_list)
-	print('img_list = ',img_list)
-	for image in img_list:
-		print(image)
-		watermark(image)
-	
-	
-	#draw_graph('舟山市')
-	#draw_graph('宁波市')
-	#draw_graph('杭州市')
+	all_country_csvfile = "all_province_commanpy_info_all_country_formated_addr_final.csv"
+	list_lines = get_list_lines_from_csv(all_country_csvfile)    ### 将csv文件转为一个list
+	provinces = get_city_set(list_lines,0)
+	print(provinces)
+	for province in provinces:
+		os.chdir(".\\"+province)   #修改当前工作目录
+		pwd = os.getcwd()    #获取当前工作目录 进入到该省	
+		draw_bar_pie_for_one_province(province+'.csv')
+		os.chdir("..")   ### 切换回全国目录
+		
+
