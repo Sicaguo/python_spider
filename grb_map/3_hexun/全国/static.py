@@ -114,29 +114,13 @@ def format_addr(csvfile,index):
 		if city:
 			cities.add(city)
 	print(cities)
-	#### 创建地址地级市和县的对应关系
-	'''
-	{'鄞州区': '宁波市', '滨江区': '杭州市', '西湖区': '杭州市', \
-	'下城区': '杭州市', '北仑区': '宁波市', '海曙区': '宁波市',\
-	 '上虞区': '绍兴市', '乐清市': '温州 市', '拱墅区': '杭州市', '江干区': '杭州市'...}
-	'''
-	dict_city_region = {}
-	for list_line in list_lines:
-		#print(list_line)
-		city = list_line[1]   ### 市
-		region = list_line[2]  ### 县
-		#print('#### region = %s,city = %s'%(region,city))
-		dict_city_region[region] = city
-	print(dict_city_region)
-	#for key in dict_city_region:
-		#print(key,dict_city_region[key])
+
 
 	
 
 	####  统计每个地级市的信息，单独存放在一个csv文件中
 	if index == 1:
 		for city in cities:
-			print(city)
 			mkdir(city)
 			path = '.\\'+city+'\\'+ city + '.csv'
 			with codecs.open(path, 'w+', encoding='utf-8') as f:
@@ -152,24 +136,21 @@ def format_addr(csvfile,index):
 	####  统计每个县的信息，单独存放在一个csv文件中
 	elif index == 2: 
 		for region in cities:    ### 这里的region就是县了,通过映射看属于哪个市，以便创建文件夹
-			city = dict_city_region[region]
-			Dir = '.\\'+city+'\\'+region   ### .\绍兴市\诸暨市
-			mkdir(Dir)
-			path = Dir + '\\'+region+'.csv' ### .\绍兴市\诸暨市\诸暨市.csv
-			
+			mkdir(region)
+			path = '.\\'+region+'\\'+ region + '.csv'
 			with codecs.open(path, 'w+', encoding='utf-8') as f:
 				writer = csv.writer(f)
 				writer.writerow(["省","市","区县","公司简称","公司全名","行业","2017前3季度销售额(万）","利润(万）","利润率","股票代码","注册地址","办公地址","官网","上市日期"])
 				#遍历每一条，然后写到对应的csv文件中去 效率有点低
 				for list_line in list_lines:
-					print(list_line)
+					#print(list_line)
 					current_region = list_line[index]
 					if current_region == region:
 						writer.writerow(list_line) 
 	elif index == 0:  ### 统计每个省的信息，单独存放在一个csv文件中
-		for city in cities:  ### 省
-				mkdir(city)
-				path = '.\\'+city+'\\'+ city + '.csv'
+		for province in cities:  ### 省
+				mkdir(province)
+				path = '.\\'+province+'\\'+ province + '.csv'
 				with codecs.open(path, 'w+', encoding='utf-8') as f:
 					writer = csv.writer(f)
 					writer.writerow(["省","市","区县","公司简称","公司全名","行业","2017前3季度销售额(万）","利润(万）","利润率","股票代码","注册地址","办公地址","官网","上市日期"])
@@ -177,7 +158,7 @@ def format_addr(csvfile,index):
 					for list_line in list_lines:
 						#print(list_line)
 						current_city = list_line[index]
-						if current_city == city:
+						if current_city == province:
 							writer.writerow(list_line)
 	return cities	
 

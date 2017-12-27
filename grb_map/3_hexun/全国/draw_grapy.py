@@ -204,7 +204,7 @@ def draw_graph(city):     #### 这里的city 是 地级市
 if __name__ == '__main__':
 	
 	
-	list_lines = get_list_lines_from_csv('zhejiang.csv') 
+	list_lines = get_list_lines_from_csv('浙江省.csv') 
 	cities = get_city_set(list_lines,1)
 	for city in cities:
 		print(city)
