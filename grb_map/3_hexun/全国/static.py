@@ -106,11 +106,11 @@ def format_addr(csvfile,index):
 		list_line = line.split(',')
 		list_lines.append(list_line)
 		#print(list_line)    
-	### 从list_lines 获取每个省的地级市\县的列表,取决于index  index=-3 则市   index=-2 则县
+	### 从list_lines 获取每个省的地级市\县的列表,取决于index  index=0省,  index  index=1 则市   index=2 则县
 	cities = set([])
 	for list_line in list_lines:
 		#print(list_line)
-		city = list_line[index]   ### 市
+		city = list_line[index]   ### 
 		if city:
 			cities.add(city)
 	print(cities)
@@ -123,8 +123,8 @@ def format_addr(csvfile,index):
 	dict_city_region = {}
 	for list_line in list_lines:
 		#print(list_line)
-		city = list_line[-3]   ### 市
-		region = list_line[-2]  ### 县
+		city = list_line[1]   ### 市
+		region = list_line[2]  ### 县
 		#print('#### region = %s,city = %s'%(region,city))
 		dict_city_region[region] = city
 	print(dict_city_region)
@@ -134,13 +134,14 @@ def format_addr(csvfile,index):
 	
 
 	####  统计每个地级市的信息，单独存放在一个csv文件中
-	if index == -3:
+	if index == 1:
 		for city in cities:
+			print(city)
 			mkdir(city)
 			path = '.\\'+city+'\\'+ city + '.csv'
 			with codecs.open(path, 'w+', encoding='utf-8') as f:
 				writer = csv.writer(f)
-				writer.writerow(["公司简称","公司全名","行业","销售额(万）","利润(万）","利润率","市","区县","办公地址"])
+				writer.writerow(["省","市","区县","公司简称","公司全名","行业","2017前3季度销售额(万）","利润(万）","利润率","股票代码","注册地址","办公地址","官网","上市日期"])
 				#遍历每一条，然后写到对应的csv文件中去 效率有点低
 				for list_line in list_lines:
 					#print(list_line)
@@ -149,7 +150,7 @@ def format_addr(csvfile,index):
 						writer.writerow(list_line)
 		return cities	
 	####  统计每个县的信息，单独存放在一个csv文件中
-	elif index == -2: 
+	elif index == 2: 
 		for region in cities:    ### 这里的region就是县了,通过映射看属于哪个市，以便创建文件夹
 			city = dict_city_region[region]
 			Dir = '.\\'+city+'\\'+region   ### .\绍兴市\诸暨市
@@ -158,7 +159,7 @@ def format_addr(csvfile,index):
 			
 			with codecs.open(path, 'w+', encoding='utf-8') as f:
 				writer = csv.writer(f)
-				writer.writerow(["公司简称","公司全名","行业","所在省","注册地","办公地","官网","上市日期"])
+				writer.writerow(["省","市","区县","公司简称","公司全名","行业","2017前3季度销售额(万）","利润(万）","利润率","股票代码","注册地址","办公地址","官网","上市日期"])
 				#遍历每一条，然后写到对应的csv文件中去 效率有点低
 				for list_line in list_lines:
 					print(list_line)
@@ -226,6 +227,7 @@ if __name__ == '__main__':
 	#	print(market_names[i])
 	#	format_addr(csvfiles[i],market_names[i])
 	#csvfile = "china_offical_markets_walmat_format.csv"  
+	
 	prov_csvfile = "all_province_commanpy_info_all_country_formated_addr_final.csv"
 	provinces = format_addr(prov_csvfile,0)    ###  ### 统计每个省的信息，单独存放在一个csv文件中
 	print(provinces)
@@ -233,10 +235,22 @@ if __name__ == '__main__':
 		os.chdir(".\\"+province)   #修改当前工作目录
 		pwd = os.getcwd()    #获取当前工作目录
 		print(pwd)
+		cities = format_addr(province+'.csv',1)  ####  这里的csvfile是 zhejiang.csv ,统计每个地级市的信息，单独存放在一个csv文件中
+		for city in cities:
+			os.chdir(".\\"+city)   #修改当前工作目录 进入到地级市
+			format_addr( city + '.csv',2)  #### 统计每个县的信息，单独存放在一个csv文件中
+			os.chdir("..") 
+
 		os.chdir("..") 
-	#for province in provinces:
-	#	format_addr('.\\'+city+'\\'+ city + '.csv',-2)
-		#csvfile = "zhejiang.csv" 
-		#cities = format_addr(csvfile,-3)  ####  这里的csvfile是 zhejiang.csv ,统计每个地级市的信息，单独存放在一个csv文件中
-		#for city in cities:
-			#format_addr('.\\'+city+'\\'+ city + '.csv',-2)  #### 统计每个县的信息，单独存放在一个csv文件中
+	
+	'''
+	os.chdir(".\\"+'浙江省')
+	pwd = os.getcwd()
+	print(pwd)
+
+	csvfile = "浙江省.csv" 
+	cities = format_addr(csvfile,1)  ####  这里的csvfile是 zhejiang.csv ,统计每个地级市的信息，单独存放在一个csv文件中
+	for city in cities:
+		format_addr('.\\'+city+'\\'+ city + '.csv',2)  #### 统计每个县的信息，单独存放在一个csv文件中
+	'''
+	

@@ -76,7 +76,7 @@ def format_addr(csvfile):
 	with codecs.open(csvfile,'r+',encoding='utf-8') as f:
 		lines = f.readlines()
 	addrs=[]
-	for line in lines:
+	for line in lines[200:]:
 		line = line.strip()
 		list_line = line.split(',')
 		print(list_line)       
