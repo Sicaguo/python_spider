@@ -226,8 +226,14 @@ if __name__ == '__main__':
 	#	print(market_names[i])
 	#	format_addr(csvfiles[i],market_names[i])
 	#csvfile = "china_offical_markets_walmat_format.csv"  
-	prov_csvfile = "all_province_commanpy_info_all_country_formated_addr.csv"
+	prov_csvfile = "all_province_commanpy_info_all_country_formated_addr_final.csv"
 	provinces = format_addr(prov_csvfile,0)    ###  ### 统计每个省的信息，单独存放在一个csv文件中
+	print(provinces)
+	for province in provinces:
+		os.chdir(".\\"+province)   #修改当前工作目录
+		pwd = os.getcwd()    #获取当前工作目录
+		print(pwd)
+		os.chdir("..") 
 	#for province in provinces:
 	#	format_addr('.\\'+city+'\\'+ city + '.csv',-2)
 		#csvfile = "zhejiang.csv" 
