@@ -2,7 +2,7 @@
 # @Author: Teiei
 # @Date:   2017-12-23 11:04:40
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-12-28 12:50:16
+# @Last Modified time: 2017-12-28 17:58:47
 # 
 # TODO 内存会爆
 #  brief
@@ -27,6 +27,7 @@ import PIL
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
+import shutil
 
 
 ####从csv读取数据,存放在list_lines里面
@@ -314,12 +315,32 @@ def draw_all_country_bar_and_pie(all_country_csvfile):
 	watermark('全国_pie.png')
 	#for image in img_list:
 	#	watermark(image)   ### 加水印
+	#	
+### 将所有image文件复制到一个文件
+def copy_all_image_in_a_dir():
+	os.mkdir('all_iamge')
+	img_list = []
+	get_jpg_type_file('.',img_list)
+	for  image in img_list:
+		shutil.copyfile(image, all_iamge) 
+	#return img_list
+	
+
+	'''
+    for file in os.listdir(path):  
+        file_path = os.path.join(path, file)  
+        if os.path.isdir(file_path):  
+            get_jpg_type_file(file_path, list_name)  
+        elif os.path.splitext(file_path)[1] in ['.png','.jpg'] :  
+            list_name.append(file_path)
+    '''
+
 if __name__ == '__main__':
 	
-	
+	'''
 	all_country_csvfile = "all_province_commanpy_info_all_country_formated_addr_final.csv"
 	draw_all_country_bar_and_pie(all_country_csvfile)  ## 画全国的图
-	'''
+
 	### 画每个省的
 	list_lines = get_list_lines_from_csv(all_country_csvfile)    ### 将csv文件转为一个list
 	provinces = get_city_set(list_lines,0)
@@ -353,3 +374,4 @@ if __name__ == '__main__':
 	draw_bar_pie_for_one_province(province+'.csv')
 	os.chdir("..")   ### 切换回全国目录
 	'''
+	copy_all_image_in_a_dir()
