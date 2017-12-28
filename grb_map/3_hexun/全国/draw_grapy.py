@@ -2,7 +2,7 @@
 # @Author: Teiei
 # @Date:   2017-12-23 11:04:40
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-12-28 17:58:47
+# @Last Modified time: 2017-12-28 22:54:45
 # 
 # TODO 内存会爆
 #  brief
@@ -123,7 +123,8 @@ def barh_plot1(labels,data,city,city_type):    ### 如果是作省的图,则刻�
 	    plt.ylabel('城市')
 	    plt.title(city+'各辖区上市公司数量')
 	    autolabel_0(rect) 
-	    plt.savefig('.\\'+city+'.png',dpi=150)  ### dpi是设置像素
+	    #plt.savefig('.\\'+city+'.png',dpi=150)  ### dpi是设置像素
+	    plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'.png',dpi=150)
 	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 #### 横的条形图
@@ -152,7 +153,8 @@ def barh_plot2(labels,data,city,city_type):   ### city_type =1  画全国  2 省
 
 	    plt.title(city+'各辖区各辖区上市公司数量')
 	    autolabel(rect)  
-	    plt.savefig('.\\'+city+'.png',dpi=150)
+	    #plt.savefig('.\\'+city+'.png',dpi=150)
+	    plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'.png',dpi=150)
 	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 	    #
@@ -160,14 +162,19 @@ def barh_plot2(labels,data,city,city_type):   ### city_type =1  画全国  2 省
 	    
 	   # plt.savefig(city+'.png')
 ###  画扇形图
-def draw_pie(labels,data,city):
+def draw_pie(labels,data,city,city_type =2):
 	plt.rcParams['font.sans-serif'] = ['SimHei']
 	plt.rcParams['axes.unicode_minus'] = False
 
 	fig = plt.figure(figsize=(10,10))
 	plt.pie(data,labels=labels,autopct='%1.1f%%',labeldistance = 1.26,pctdistance = 1.05,radius=1.1) #画饼图（数据，数据对应的标签，百分数保留两位小数点
-	plt.title(city+'境内上市公司行业分布')
-	plt.savefig('.\\'+city+'_pie.png',dpi=150)
+	if city_type == 1:
+		plt.title(city+'境内上市公司各地级市分布')
+	else:
+		plt.title(city+'境内上市公司行业分布')
+	#plt.savefig('.\\'+city+'_pie.png',dpi=150)
+	
+	plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'_pie.png',dpi=150)
 	#plt.savefig('.\\'+city+'_pie.png',dpi=150)
 	#plt.show()
 
@@ -219,8 +226,8 @@ def draw_graph_bar_city(city):     #### 这里的city 是 地级市  画一个�
 		labels.append(item[0])
 		data.append(item[1])
 	'''
-	barh_plot1(labels,data,city,False)
-	#draw_pie(labels,data,city)
+	barh_plot1(labels,data,city,3)
+	draw_pie(labels,data,city)
 def draw_graph_pie_city(city):     #### 这里的city 是 地级市  画一个地级市的行业扇形图
 	csvfile = city+'.csv'
 	#print(csvfile)
@@ -260,8 +267,8 @@ def draw_graph_province_bar_and_pie(province):
 		#print(item)
 		labels.append(item[0])
 		data.append(item[1])
-	draw_pie(labels,data,province)
-	barh_plot1(labels,data,province,True)
+	draw_pie(labels,data,province,1)
+	barh_plot1(labels,data,province,2)
 
 
 
@@ -310,7 +317,7 @@ def draw_all_country_bar_and_pie(all_country_csvfile):
 		labels.append(item[0])
 		data.append(item[1])
 	draw_pie(labels,data,'全国')
-	barh_plot1(labels,data,'全国',True)
+	barh_plot1(labels,data,'全国',1)
 	watermark('全国.png') 
 	watermark('全国_pie.png')
 	#for image in img_list:
@@ -318,11 +325,11 @@ def draw_all_country_bar_and_pie(all_country_csvfile):
 	#	
 ### 将所有image文件复制到一个文件
 def copy_all_image_in_a_dir():
-	os.mkdir('all_iamge')
+	os.mkdir('..\\all_iamge')
 	img_list = []
 	get_jpg_type_file('.',img_list)
 	for  image in img_list:
-		shutil.copyfile(image, all_iamge) 
+		shutil.copyfile(image, '..\\all_iamge') 
 	#return img_list
 	
 
@@ -367,11 +374,11 @@ if __name__ == '__main__':
 		draw_bar_pie_for_one_province(province+'.csv')
 		os.chdir("..")   ### 切换回全国目录
 	'''
-	'''
-	province = '广东省'
+	
+	province = '江苏省'
 	os.chdir(".\\"+province)   #修改当前工作目录
 	#pwd = os.getcwd()    #获取当前工作目录 进入到该省	
 	draw_bar_pie_for_one_province(province+'.csv')
 	os.chdir("..")   ### 切换回全国目录
-	'''
-	copy_all_image_in_a_dir()
+	
+	#copy_all_image_in_a_dir()
