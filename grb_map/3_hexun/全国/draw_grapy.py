@@ -2,7 +2,7 @@
 # @Author: Teiei
 # @Date:   2017-12-23 11:04:40
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-12-27 21:28:33
+# @Last Modified time: 2017-12-28 10:18:17
 # 
 # TODO 内存会爆
 #  brief
@@ -27,6 +27,7 @@ import PIL
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
+
 
 ####从csv读取数据,存放在list_lines里面
 def get_list_lines_from_csv(csvfile):
@@ -96,10 +97,10 @@ def autolabel_0(rects):
         #print('width = ',width)
         height = rect.get_height() 
         #print('height = ',height)
-        plt.text(width+0.6, rect.get_y(), width, ha='center', va='bottom') 
+        plt.text(width+1.2, rect.get_y(), width, ha='center', va='bottom') 
 
 #### 纵的条形图
-def barh_plot1(labels,data,city):   
+def barh_plot1(labels,data,city,is_province):    ### 如果是作省的图,则刻度不一样，所以要区分 
 	    plt.rcParams['font.sans-serif'] = ['SimHei']
 	    plt.rcParams['axes.unicode_minus'] = False
 
@@ -108,8 +109,12 @@ def barh_plot1(labels,data,city):
 	    rect= plt.barh(idx, data, color='green',alpha=0.6)  ###alpha颜色深浅  ,height=1.1
 	    plt.yticks(idx,labels)
 	    #plt.grid(axis='x') ### 是否有格子线
-	    plt.xlim(xmax=35, xmin=0)
-	    plt.ylim(ymax=15, ymin=-1)
+	    if is_province:
+	    	plt.xlim(xmax=310, xmin=0)  ### 一个省内的每个地级市的上市公司假定不超过310 深圳：300  杭州147
+	    	plt.ylim(ymax=20, ymin=-1)  ### 一个省内的地级市假定不超过20
+	    else:
+	    	plt.xlim(xmax=125, xmin=0)   ### 一个地级市的上市公司假定不超过70 深圳南山123：  杭州滨江：35
+	    	plt.ylim(ymax=15, ymin=-1)  ### 一个地级市内的区县数假定不超过15
 	    plt.xlabel('上市公司数量')
 	    plt.ylabel('城市')
 	    plt.title(city+'各辖区上市公司数量')
@@ -118,15 +123,19 @@ def barh_plot1(labels,data,city):
 	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 #### 横的条形图
-def barh_plot2(labels,data,city): 
+def barh_plot2(labels,data,city,is_province): 
 	    plt.rcParams['font.sans-serif'] = ['SimHei']
 	    plt.rcParams['axes.unicode_minus'] = False
 	    #labels= ['a','b','c','d']
 	    #data=[1,2,3,4]
 	    idx = np.arange(len(data))
 	    fig = plt.figure(figsize=(5,5))   ###这个越小，保存出来的图片反而越大
-	    plt.ylim(ymax=35, ymin=0)
-	    plt.xlim(xmax=15, xmin=-1)
+	    if is_province:
+	    	plt.xlim(xmax=310, xmin=0)  ### 一个省内的每个地级市的上市公司假定不超过310 深圳：300  杭州147
+	    	plt.ylim(ymax=20, ymin=-1)  ### 一个省内的地级市假定不超过20
+	    else:
+	    	plt.xlim(xmax=125, xmin=0)   ### 一个地级市的上市公司假定不超过100 深圳南山123：  杭州滨江：35
+	    	plt.ylim(ymax=15, ymin=-1)  ### 一个地级市内的区县数假定不超过15
 	    #fig = plt.figure()
 	    rect = plt.bar(idx,data  , color='green',alpha=0.5,width = 0.4)###plt.bar 横向
 	    plt.yticks(idx,labels)
@@ -178,7 +187,7 @@ def watermark(imageFile):
 	#im1.save(imageFile[:-4]+"_watermark.png")
 	im1.save(imageFile)  ### 覆盖掉原来的
 def draw_graph_bar_city(city):     #### 这里的city 是 地级市  画一个地级市各区县的条形图
-	csvfile = '.\\'+city+'\\'+city+'.csv'
+	csvfile = city+'.csv'
 	#print(csvfile)
 	list_lines =  get_list_lines_from_csv(csvfile)   ### 将csv文件提取为list
 	#print(list_lines)
@@ -203,10 +212,10 @@ def draw_graph_bar_city(city):     #### 这里的city 是 地级市  画一个�
 		labels.append(item[0])
 		data.append(item[1])
 	'''
-	barh_plot1(labels,data,city)
+	barh_plot1(labels,data,city,False)
 	#draw_pie(labels,data,city)
 def draw_graph_pie_city(city):     #### 这里的city 是 地级市  画一个地级市的行业扇形图
-	csvfile = '.\\'+city+'\\'+city+'.csv'
+	csvfile = city+'.csv'
 	#print(csvfile)
 	list_lines =  get_list_lines_from_csv(csvfile)   ### 将csv文件提取为list
 	#print(list_lines)
@@ -245,7 +254,7 @@ def draw_graph_province_bar_and_pie(province):
 		labels.append(item[0])
 		data.append(item[1])
 	draw_pie(labels,data,province)
-	barh_plot1(labels,data,province)
+	barh_plot1(labels,data,province,True)
 
 
 ####  画一个省的图 包括
@@ -261,11 +270,15 @@ def draw_bar_pie_for_one_province(prov_csvfile):  ### prov_csvfile 为 广东省
 		list_lines = get_list_lines_from_csv(prov_csvfile) 
 		cities = get_city_set(list_lines,1)
 		for city in cities:
-			print(city)
+			print('process... ',city)
 			os.chdir(city) 
-			#draw_graph_bar_city(city)
-			#draw_graph_pie_city(city)
+			pwd = os.getcwd()
+			print('enter dir...',pwd)
+			draw_graph_bar_city(city)
+			draw_graph_pie_city(city)
 			os.chdir("..") 
+			pwd = os.getcwd()
+			print('exit dir ...',pwd)
 		### 增加水印
 		img_list = []
 		get_jpg_type_file('.',img_list)
@@ -304,7 +317,7 @@ if __name__ == '__main__':
 	'''
 	province = '广东省'
 	os.chdir(".\\"+province)   #修改当前工作目录
-	pwd = os.getcwd()    #获取当前工作目录 进入到该省	
+	#pwd = os.getcwd()    #获取当前工作目录 进入到该省	
 	draw_bar_pie_for_one_province(province+'.csv')
 	os.chdir("..")   ### 切换回全国目录
 
