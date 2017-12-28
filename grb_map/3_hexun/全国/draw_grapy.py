@@ -2,7 +2,7 @@
 # @Author: Teiei
 # @Date:   2017-12-23 11:04:40
 # @Last Modified by:   Teiei
-# @Last Modified time: 2017-12-28 10:18:17
+# @Last Modified time: 2017-12-28 12:50:16
 # 
 # TODO 内存会爆
 #  brief
@@ -100,7 +100,7 @@ def autolabel_0(rects):
         plt.text(width+1.2, rect.get_y(), width, ha='center', va='bottom') 
 
 #### 纵的条形图
-def barh_plot1(labels,data,city,is_province):    ### 如果是作省的图,则刻度不一样，所以要区分 
+def barh_plot1(labels,data,city,city_type):    ### 如果是作省的图,则刻度不一样，所以要区分 
 	    plt.rcParams['font.sans-serif'] = ['SimHei']
 	    plt.rcParams['axes.unicode_minus'] = False
 
@@ -109,7 +109,10 @@ def barh_plot1(labels,data,city,is_province):    ### 如果是作省的图,则�
 	    rect= plt.barh(idx, data, color='green',alpha=0.6)  ###alpha颜色深浅  ,height=1.1
 	    plt.yticks(idx,labels)
 	    #plt.grid(axis='x') ### 是否有格子线
-	    if is_province:
+	    if city_type == 1:
+	    	plt.xlim(xmax=700, xmin=0)  ### 一个省内的上市公司假定不超过700 广东：600  浙江400
+	    	plt.ylim(ymax=34, ymin=-1)  ### 一个中国省不超过34
+	    elif city_type == 2:
 	    	plt.xlim(xmax=310, xmin=0)  ### 一个省内的每个地级市的上市公司假定不超过310 深圳：300  杭州147
 	    	plt.ylim(ymax=20, ymin=-1)  ### 一个省内的地级市假定不超过20
 	    else:
@@ -123,18 +126,21 @@ def barh_plot1(labels,data,city,is_province):    ### 如果是作省的图,则�
 	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 #### 横的条形图
-def barh_plot2(labels,data,city,is_province): 
+def barh_plot2(labels,data,city,city_type):   ### city_type =1  画全国  2 省   3 地级市
 	    plt.rcParams['font.sans-serif'] = ['SimHei']
 	    plt.rcParams['axes.unicode_minus'] = False
 	    #labels= ['a','b','c','d']
 	    #data=[1,2,3,4]
 	    idx = np.arange(len(data))
 	    fig = plt.figure(figsize=(5,5))   ###这个越小，保存出来的图片反而越大
-	    if is_province:
+	    if city_type == 1:
+	    	plt.xlim(xmax=700, xmin=0)  ### 一个省内的上市公司假定不超过700 广东：600  浙江400
+	    	plt.ylim(ymax=34, ymin=-1)  ### 一个中国省不超过34
+	    elif city_type == 2:
 	    	plt.xlim(xmax=310, xmin=0)  ### 一个省内的每个地级市的上市公司假定不超过310 深圳：300  杭州147
 	    	plt.ylim(ymax=20, ymin=-1)  ### 一个省内的地级市假定不超过20
 	    else:
-	    	plt.xlim(xmax=125, xmin=0)   ### 一个地级市的上市公司假定不超过100 深圳南山123：  杭州滨江：35
+	    	plt.xlim(xmax=125, xmin=0)   ### 一个地级市的上市公司假定不超过70 深圳南山123：  杭州滨江：35
 	    	plt.ylim(ymax=15, ymin=-1)  ### 一个地级市内的区县数假定不超过15
 	    #fig = plt.figure()
 	    rect = plt.bar(idx,data  , color='green',alpha=0.5,width = 0.4)###plt.bar 横向
@@ -257,6 +263,7 @@ def draw_graph_province_bar_and_pie(province):
 	barh_plot1(labels,data,province,True)
 
 
+
 ####  画一个省的图 包括
 ### 1.每个地级市辖内各区县的条形图
 ### 2.每个地级市的行业分布扇形图
@@ -286,10 +293,34 @@ def draw_bar_pie_for_one_province(prov_csvfile):  ### prov_csvfile 为 广东省
 		for image in img_list:
 			#print(image)
 			watermark(image)   ### 加水印
+'''
+1.画全国各省上市公司数量分布的条形图
+2.画全国各省上市公司数量分布的扇形图
+'''
+def draw_all_country_bar_and_pie(all_country_csvfile):
+	list_lines =  get_list_lines_from_csv(all_country_csvfile)   ### 将csv文件提取为list
+	dict_item = get_unique_item_amount_dict(list_lines,0)  ### 获取第1列的数据透视表
+	labels = []
+	data=[]
+	dict_item = sorted(dict_item.items(),key=lambda item :item[1],reverse = True)
+	#print(dict_item)
+	for item in dict_item:
+		#print(item)
+		labels.append(item[0])
+		data.append(item[1])
+	draw_pie(labels,data,'全国')
+	barh_plot1(labels,data,'全国',True)
+	watermark('全国.png') 
+	watermark('全国_pie.png')
+	#for image in img_list:
+	#	watermark(image)   ### 加水印
 if __name__ == '__main__':
 	
-	'''
+	
 	all_country_csvfile = "all_province_commanpy_info_all_country_formated_addr_final.csv"
+	draw_all_country_bar_and_pie(all_country_csvfile)  ## 画全国的图
+	'''
+	### 画每个省的
 	list_lines = get_list_lines_from_csv(all_country_csvfile)    ### 将csv文件转为一个list
 	provinces = get_city_set(list_lines,0)
 	print(provinces)
@@ -315,9 +346,10 @@ if __name__ == '__main__':
 		draw_bar_pie_for_one_province(province+'.csv')
 		os.chdir("..")   ### 切换回全国目录
 	'''
+	'''
 	province = '广东省'
 	os.chdir(".\\"+province)   #修改当前工作目录
 	#pwd = os.getcwd()    #获取当前工作目录 进入到该省	
 	draw_bar_pie_for_one_province(province+'.csv')
 	os.chdir("..")   ### 切换回全国目录
-
+	'''
