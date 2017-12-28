@@ -114,7 +114,7 @@ def barh_plot1(labels,data,city):
 	    plt.ylabel('城市')
 	    plt.title(city+'各辖区上市公司数量')
 	    autolabel_0(rect) 
-	    plt.savefig('.\\'+city+'\\'+city+'.png',dpi=150)  ### dpi是设置像素
+	    plt.savefig('.\\'+city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 #### 横的条形图
@@ -136,7 +136,7 @@ def barh_plot2(labels,data,city):
 
 	    plt.title(city+'各辖区各辖区上市公司数量')
 	    autolabel(rect)  
-	    plt.savefig('.\\'+city+'\\'+city+'.png',dpi=150)
+	    plt.savefig('.\\'+city+'.png',dpi=150)
 	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 	    #
@@ -151,7 +151,7 @@ def draw_pie(labels,data,city):
 	fig = plt.figure(figsize=(10,10))
 	plt.pie(data,labels=labels,autopct='%1.1f%%',labeldistance = 1.26,pctdistance = 1.05,radius=1.1) #画饼图（数据，数据对应的标签，百分数保留两位小数点
 	plt.title(city+'境内上市公司行业分布')
-	plt.savefig('.\\'+city+'\\'+city+'_pie.png',dpi=150)
+	plt.savefig('.\\'+city+'_pie.png',dpi=150)
 	#plt.savefig('.\\'+city+'_pie.png',dpi=150)
 	#plt.show()
 
@@ -177,7 +177,7 @@ def watermark(imageFile):
 	#另存图片
 	#im1.save(imageFile[:-4]+"_watermark.png")
 	im1.save(imageFile)  ### 覆盖掉原来的
-def draw_graph_bar(city):     #### 这里的city 是 地级市  画一个地级市各区县的条形图
+def draw_graph_bar_city(city):     #### 这里的city 是 地级市  画一个地级市各区县的条形图
 	csvfile = '.\\'+city+'\\'+city+'.csv'
 	#print(csvfile)
 	list_lines =  get_list_lines_from_csv(csvfile)   ### 将csv文件提取为list
@@ -205,7 +205,7 @@ def draw_graph_bar(city):     #### 这里的city 是 地级市  画一个地级�
 	'''
 	barh_plot1(labels,data,city)
 	#draw_pie(labels,data,city)
-def draw_graph_pie(city):     #### 这里的city 是 地级市  画一个地级市的行业扇形图
+def draw_graph_pie_city(city):     #### 这里的city 是 地级市  画一个地级市的行业扇形图
 	csvfile = '.\\'+city+'\\'+city+'.csv'
 	#print(csvfile)
 	list_lines =  get_list_lines_from_csv(csvfile)   ### 将csv文件提取为list
@@ -232,24 +232,47 @@ def draw_graph_pie(city):     #### 这里的city 是 地级市  画一个地级�
 		data.append(item[1])
 	'''
 	draw_pie(labels,data,city)
+def draw_graph_province_bar_and_pie(province):
 
-####  画一个省的图
-def draw_bar_pie_for_one_province(prov_csvfile):
+	list_lines =  get_list_lines_from_csv(province+'.csv')   ### 将csv文件提取为list
+	dict_item = get_unique_item_amount_dict(list_lines,1)  ### 获取第1列的数据透视表
+	labels = []
+	data=[]
+	dict_item = sorted(dict_item.items(),key=lambda item :item[1],reverse = True)
+	#print(dict_item)
+	for item in dict_item:
+		#print(item)
+		labels.append(item[0])
+		data.append(item[1])
+	draw_pie(labels,data,province)
+	barh_plot1(labels,data,province)
+
+
+####  画一个省的图 包括
+### 1.每个地级市辖内各区县的条形图
+### 2.每个地级市的行业分布扇形图
+### 3.一个省内所有地级市的条形图
+### 4.一个省内所有地级市的扇形图
+def draw_bar_pie_for_one_province(prov_csvfile):  ### prov_csvfile 为 广东省.csv
+		print('##### prov_csvfile[:-4] = ',prov_csvfile[:-4])
+		draw_graph_province_bar_and_pie(prov_csvfile[:-4])
+
 
 		list_lines = get_list_lines_from_csv(prov_csvfile) 
 		cities = get_city_set(list_lines,1)
 		for city in cities:
 			print(city)
-			#draw_graph(city)
-			draw_graph_bar(city)
-			draw_graph_pie(city)
+			os.chdir(city) 
+			#draw_graph_bar_city(city)
+			#draw_graph_pie_city(city)
+			os.chdir("..") 
 		### 增加水印
 		img_list = []
 		get_jpg_type_file('.',img_list)
 		#print('img_list = ',img_list)
 		for image in img_list:
 			#print(image)
-			watermark(image)
+			watermark(image)   ### 加水印
 if __name__ == '__main__':
 	
 	'''
