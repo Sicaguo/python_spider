@@ -1,0 +1,12 @@
+从和讯网爬取中国境内(沪深)上市公司，并可视化统计每个省、市、县上市公司的信息
+爬取并处理后的得到：all_province_commanpy_info_all_country_formated_addr_final.csv
+
+数据统计部分：只需下载下面三个
+all_province_commanpy_info_all_country_formated_addr_final.csv
+static.py
+draw_grapy.py   
+
+static.py 按省拆分
+draw_grapy.py  绘图
+
+绘制的所有图片由于太大，已放到公众号： 数据地图迷  也可以扫描当前目录下的二维码
