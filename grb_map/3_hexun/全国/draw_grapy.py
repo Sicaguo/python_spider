@@ -8,6 +8,15 @@
 #  brief
 #  1.画一个省所有地级市的图，比如宁波市，画的就是宁波市市各区的上市公司
 #  2.画每个地级市的上市公司行业分布的扇形图
+
+'''
+ rbguo 2017-12-29 解决内存被耗尽的问题
+  看到一个提示  同时在绘制的图太多了 
+(`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory
+  绘图完了之后必须调用plt.close('all') 不然图片不会关闭，会一直占用内存，直到内存耗尽
+
+
+'''
 import gc
 import numpy as np    
 import matplotlib.mlab as mlab    
@@ -85,7 +94,7 @@ def get_unique_item_amount_dict(list_lines,index):
 	for list_line in list_lines:
 		item = list_line[index]
 		dict_colurmn_index[item] = dict_colurmn_index[item] +1
-	print(dict_colurmn_index)
+	#print(dict_colurmn_index)
 	return dict_colurmn_index	
 
 def autolabel(rects):  
@@ -124,6 +133,8 @@ def barh_plot1(labels,data,city,city_type):    ### 如果是作省的图,则刻�
 	    plt.title(city+'各辖区上市公司数量')
 	    autolabel_0(rect) 
 	    plt.savefig('.\\'+city+'.png',dpi=150)  ### dpi是设置像素
+	    fig.clear()
+	    plt.close('all')
 	    #plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'.png',dpi=150)
 	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
@@ -156,11 +167,14 @@ def barh_plot2(labels,data,city,city_type):   ### city_type =1  画全国  2 省
 	    #plt.savefig('.\\'+city+'.png',dpi=150)
 	    #plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'.png',dpi=150)
 	    plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
+	    fig.clear()
+	    plt.close('all')
 	    #plt.show()
 	    #
 	    #fig = plt.figure()
 	    
 	   # plt.savefig(city+'.png')
+
 ###  画扇形图
 def draw_pie(labels,data,city,city_type =2):
 	plt.rcParams['font.sans-serif'] = ['SimHei']
@@ -176,6 +190,8 @@ def draw_pie(labels,data,city,city_type =2):
 	
 	#plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'_pie.png',dpi=150)
 	plt.savefig('.\\'+city+'_pie.png',dpi=150)
+	fig.clear()
+	plt.close('all')
 	#plt.show()
 
 def get_jpg_type_file(path, list_name):  
@@ -207,8 +223,6 @@ def draw_graph_bar_city(city):     #### 这里的city 是 地级市  画一个�
 	#print(list_lines)
 	#dict_city_commany_num = get_labes_data(list_lines,2)
 	dict_item = get_unique_item_amount_dict(list_lines,2)  ### 获取第二列的数据透视表
-	del list_lines
-	gc.collect()
 	labels = []
 	data=[]
 	dict_item = sorted(dict_item.items(),key=lambda item :item[1],reverse = True)
@@ -229,9 +243,7 @@ def draw_graph_bar_city(city):     #### 这里的city 是 地级市  画一个�
 		data.append(item[1])
 	'''
 	barh_plot1(labels,data,city,3)
-	draw_pie(labels,data,city)
-	del labels,data,dict_item
-	gc.collect()
+	#draw_pie(labels,data,city)
 def draw_graph_pie_city(city):     #### 这里的city 是 地级市  画一个地级市的行业扇形图
 	csvfile = city+'.csv'
 	#print(csvfile)
@@ -239,8 +251,6 @@ def draw_graph_pie_city(city):     #### 这里的city 是 地级市  画一个�
 	#print(list_lines)
 	#dict_city_commany_num = get_labes_data(list_lines,2)
 	dict_item = get_unique_item_amount_dict(list_lines,5)  ### 获取第二列的数据透视表
-	del list_lines
-	gc.collect()
 	labels = []
 	data=[]
 	dict_item = sorted(dict_item.items(),key=lambda item :item[1],reverse = True)
@@ -261,14 +271,10 @@ def draw_graph_pie_city(city):     #### 这里的city 是 地级市  画一个�
 		data.append(item[1])
 	'''
 	draw_pie(labels,data,city)
-	del labels,data,dict_item
-	gc.collect()
 def draw_graph_province_bar_and_pie(province):
 
 	list_lines =  get_list_lines_from_csv(province+'.csv')   ### 将csv文件提取为list
 	dict_item = get_unique_item_amount_dict(list_lines,1)  ### 获取第1列的数据透视表
-	del list_lines
-	gc.collect()
 	labels = []
 	data=[]
 	dict_item = sorted(dict_item.items(),key=lambda item :item[1],reverse = True)
@@ -279,8 +285,6 @@ def draw_graph_province_bar_and_pie(province):
 		data.append(item[1])
 	draw_pie(labels,data,province,1)
 	barh_plot1(labels,data,province,2)
-	del labels,data,dict_item
-	gc.collect()
 
 
 ####  画一个省的图 包括
@@ -295,15 +299,13 @@ def draw_bar_pie_for_one_province(prov_csvfile):  ### prov_csvfile 为 广东省
 
 		list_lines = get_list_lines_from_csv(prov_csvfile) 
 		cities = get_city_set(list_lines,1)
-		del list_lines
-		gc.collect()
 		for city in cities:
 			print('process... ',city)
 			os.chdir(city) 
 			pwd = os.getcwd()
 			print('enter dir...',pwd)
 			draw_graph_bar_city(city)
-			time.sleep(5)
+			#time.sleep(1)
 			draw_graph_pie_city(city)
 			os.chdir("..") 
 			pwd = os.getcwd()
@@ -315,8 +317,6 @@ def draw_bar_pie_for_one_province(prov_csvfile):  ### prov_csvfile 为 广东省
 		for image in img_list:
 			#print(image)
 			watermark(image)   ### 加水印
-		del img_list
-		gc.collect()
 		
 '''
 1.画全国各省上市公司数量分布的条形图
@@ -371,20 +371,21 @@ if __name__ == '__main__':
 	### 画每个省的
 	list_lines = get_list_lines_from_csv(all_country_csvfile)    ### 将csv文件转为一个list
 	provinces = get_city_set(list_lines,0)
-	del list_lines 
-	gc.collect()
 	#  print('listlines = ',list_lines)### 验证内存是否回收成功
 
 	print(provinces)
 	provinces = list(provinces)
-	print(len(provinces))
-	time.sleep(5)
-	for province in provinces[0:10]:
+	len_provinces = len(provinces)
+	finished_len = 0
+	#time.sleep(5)
+	for province in provinces:
 		os.chdir(".\\"+province)   #修改当前工作目录
 		#pwd = os.getcwd()    #获取当前工作目录 进入到该省	
+		print('已经完成.....[%d|%d]'%(finished_len,len_provinces))
 		draw_bar_pie_for_one_province(province+'.csv')
 		copy_all_image_in_a_dir()
 		os.chdir("..")   ### 切换回全国目录
+		finished_len = finished_len+1
 	
 	
 	'''
