@@ -123,8 +123,8 @@ def barh_plot1(labels,data,city,city_type):    ### 如果是作省的图,则刻�
 	    plt.ylabel('城市')
 	    plt.title(city+'各辖区上市公司数量')
 	    autolabel_0(rect) 
-	    #plt.savefig('.\\'+city+'.png',dpi=150)  ### dpi是设置像素
-	    plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'.png',dpi=150)
+	    plt.savefig('.\\'+city+'.png',dpi=150)  ### dpi是设置像素
+	    #plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'.png',dpi=150)
 	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 #### 横的条形图
@@ -154,8 +154,8 @@ def barh_plot2(labels,data,city,city_type):   ### city_type =1  画全国  2 省
 	    plt.title(city+'各辖区各辖区上市公司数量')
 	    autolabel(rect)  
 	    #plt.savefig('.\\'+city+'.png',dpi=150)
-	    plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'.png',dpi=150)
-	    #plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
+	    #plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'.png',dpi=150)
+	    plt.savefig(city+'.png',dpi=150)  ### dpi是设置像素
 	    #plt.show()
 	    #
 	    #fig = plt.figure()
@@ -174,8 +174,8 @@ def draw_pie(labels,data,city,city_type =2):
 		plt.title(city+'境内上市公司行业分布')
 	#plt.savefig('.\\'+city+'_pie.png',dpi=150)
 	
-	plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'_pie.png',dpi=150)
-	#plt.savefig('.\\'+city+'_pie.png',dpi=150)
+	#plt.savefig('G:\study\\version_spider\python_spider\grb_map\\3_hexun\全国\江苏省\\'+city+'_pie.png',dpi=150)
+	plt.savefig('.\\'+city+'_pie.png',dpi=150)
 	#plt.show()
 
 def get_jpg_type_file(path, list_name):  
@@ -323,13 +323,16 @@ def draw_all_country_bar_and_pie(all_country_csvfile):
 	#for image in img_list:
 	#	watermark(image)   ### 加水印
 	#	
-### 将所有image文件复制到一个文件
+### 将一个省中所有的图片复制到根目录下all_iamge
 def copy_all_image_in_a_dir():
-	os.mkdir('..\\all_iamge')
+	if os.path.exists('all_iamge'):
+		shutil.rmtree('all_iamge')
+		print('remove')
+	os.mkdir('all_iamge')
 	img_list = []
 	get_jpg_type_file('.',img_list)
 	for  image in img_list:
-		shutil.copyfile(image, '..\\all_iamge') 
+		shutil.copy(image, 'all_iamge') 
 	#return img_list
 	
 
@@ -378,7 +381,8 @@ if __name__ == '__main__':
 	province = '江苏省'
 	os.chdir(".\\"+province)   #修改当前工作目录
 	#pwd = os.getcwd()    #获取当前工作目录 进入到该省	
-	draw_bar_pie_for_one_province(province+'.csv')
+	#draw_bar_pie_for_one_province(province+'.csv')
+	copy_all_image_in_a_dir()
 	os.chdir("..")   ### 切换回全国目录
 	
-	#copy_all_image_in_a_dir()
+	
