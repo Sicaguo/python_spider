@@ -391,7 +391,7 @@ def copy_all_csvfile_in_a_dir():
 
 if __name__ == '__main__':
 	
-	'''
+	
 	
 	all_country_csvfile = "all_province_commanpy_info_all_country_formated_addr_final.csv"
 	draw_all_country_bar_and_pie(all_country_csvfile)  ## 画全国的图
@@ -412,13 +412,14 @@ if __name__ == '__main__':
 		print('\n已经完成............................................[%d/%d]\n\n'%(finished_len,len_provinces))
 		draw_bar_pie_for_one_province(province+'.csv')
 		copy_all_image_in_a_dir()
+		copy_all_csvfile_in_a_dir()
 		os.chdir("..")   ### 切换回全国目录
 		finished_len = finished_len+1
 	
 
-	'''
-
 	
+
+	'''
 	province = '江苏省'
 	os.chdir(".\\"+province)   #修改当前工作目录
 	#pwd = os.getcwd()    #获取当前工作目录 进入到该省	
@@ -426,6 +427,7 @@ if __name__ == '__main__':
 	copy_all_image_in_a_dir()
 	copy_all_csvfile_in_a_dir()
 	os.chdir("..")   ### 切换回全国目录
+	'''
 	
 	
 	
