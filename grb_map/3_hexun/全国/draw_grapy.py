@@ -194,6 +194,9 @@ def draw_pie(labels,data,city,city_type =2):
 	plt.close('all')
 	#plt.show()
 
+'''
+	获取当前目录下所有image文件并将文件名存放在list_name
+'''
 def get_jpg_type_file(path, list_name):  
     for file in os.listdir(path):  
         file_path = os.path.join(path, file)  
@@ -201,6 +204,20 @@ def get_jpg_type_file(path, list_name):
             get_jpg_type_file(file_path, list_name)  
         elif os.path.splitext(file_path)[1] in ['.png','.jpg'] :  
             list_name.append(file_path)  
+'''
+csv 只需要省市两级，不要到县，
+'''
+def get_csv_type_file(path, list_name,count =2 ):  
+	count = count-1 
+	if(count>=0):
+	    print('coutn= ',count)
+	    for file in os.listdir(path):  
+	        file_path = os.path.join(path, file)  
+	        if os.path.isdir(file_path): 
+
+	        	get_csv_type_file(file_path, list_name,count)  
+	        elif os.path.splitext(file_path)[1] == '.csv' :  
+	            list_name.append(file_path)  
 def watermark(imageFile):
 	#设置所使用的字体
 	font = ImageFont.truetype("c:/Windows/fonts/simsun.ttc", 20)
@@ -350,6 +367,16 @@ def copy_all_image_in_a_dir():
 	get_jpg_type_file('.',img_list)
 	for  image in img_list:
 		shutil.copy(image, 'all_iamge') 
+def copy_all_csvfile_in_a_dir():
+	if os.path.exists('all_csv'):
+		shutil.rmtree('all_csv')
+		print('remove')
+	os.mkdir('all_csv')
+	csv_list = []
+	get_csv_type_file('.',csv_list)
+	print(csv_list)
+	for  csv_fire in csv_list:
+		shutil.copy(csv_fire, 'all_csv') 
 	#return img_list
 	
 
@@ -365,6 +392,7 @@ def copy_all_image_in_a_dir():
 if __name__ == '__main__':
 	
 	'''
+	
 	all_country_csvfile = "all_province_commanpy_info_all_country_formated_addr_final.csv"
 	draw_all_country_bar_and_pie(all_country_csvfile)  ## 画全国的图
 
@@ -381,35 +409,24 @@ if __name__ == '__main__':
 	for province in provinces:
 		os.chdir(".\\"+province)   #修改当前工作目录
 		#pwd = os.getcwd()    #获取当前工作目录 进入到该省	
-		print('已经完成.....[%d|%d]'%(finished_len,len_provinces))
+		print('\n已经完成............................................[%d/%d]\n\n'%(finished_len,len_provinces))
 		draw_bar_pie_for_one_province(province+'.csv')
 		copy_all_image_in_a_dir()
 		os.chdir("..")   ### 切换回全国目录
 		finished_len = finished_len+1
 	
+
 	'''
-	'''
-	time.sleep(5)
-	for province in provinces[10:20]:
-		os.chdir(".\\"+province)   #修改当前工作目录
-		pwd = os.getcwd()    #获取当前工作目录 进入到该省	
-		draw_bar_pie_for_one_province(province+'.csv')
-		os.chdir("..")   ### 切换回全国目录
-		time.sleep(5)
-	for province in provinces[20:32]:
-		os.chdir(".\\"+province)   #修改当前工作目录
-		pwd = os.getcwd()    #获取当前工作目录 进入到该省	
-		draw_bar_pie_for_one_province(province+'.csv')
-		os.chdir("..")   ### 切换回全国目录
-	'''
-	
+
 	
 	province = '江苏省'
 	os.chdir(".\\"+province)   #修改当前工作目录
 	#pwd = os.getcwd()    #获取当前工作目录 进入到该省	
 	draw_bar_pie_for_one_province(province+'.csv')
 	copy_all_image_in_a_dir()
+	copy_all_csvfile_in_a_dir()
 	os.chdir("..")   ### 切换回全国目录
+	
 	
 	
 	
